@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
+using Common;
 #endregion
 
 namespace Block_Busters
@@ -18,6 +19,19 @@ namespace Block_Busters
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+
+        enum GameState
+        {
+            Menu,
+            Play,
+            Pause,
+            End
+        }
+        Dictionary<GameState, Transform> states;
+        GameState currentState;
+
+        ModelObject ground;
+        Camera[] cameras;
 
         public Game1()
             : base()
@@ -34,8 +48,15 @@ namespace Block_Busters
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // set up scene states
+            states = new Dictionary<GameState, Transform>();
+            states[GameState.Menu] = new Transform();
+            states[GameState.Play] = new Transform();
+            states[GameState.Pause] = new Transform();
+            states[GameState.End] = new Transform();
+            currentState = GameState.Menu;
 
+            InputManager.Initialize();
             base.Initialize();
         }
 
@@ -47,6 +68,16 @@ namespace Block_Busters
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // set up cameras
+            cameras = new Camera[2];
+            cameras[0] = new Camera();
+            //cameras[0].Position = whatever; 
+            //cameras[0].RotateX = -MathHelper.PiOver2; // to look down
+            cameras[0].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
+            cameras[1] = new Camera();
+            //cameras[1].Position = whatever;
+            cameras[1].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
             // TODO: use this.Content to load your game content here
         }
@@ -71,7 +102,45 @@ namespace Block_Busters
                 Exit();
 
             // TODO: Add your update logic here
+            states[currentState].Update(gameTime);
+            states[currentState].Update(gameTime, Matrix.Identity);
 
+            // to go directly to game state
+            if (InputManager.isKeyReleased(Keys.D1))
+            {
+                currentState = GameState.Menu;
+            }
+            if (InputManager.isKeyReleased(Keys.D2))
+            {
+                currentState = GameState.Play;
+            }
+            if (InputManager.isKeyReleased(Keys.D3))
+            {
+                currentState = GameState.Pause;
+            }
+            if (InputManager.isKeyReleased(Keys.D4))
+            {
+                currentState = GameState.End;
+            }
+
+
+            // P to Pause
+            if (currentState.Equals(GameState.Play) || currentState.Equals(GameState.Pause))
+            {
+                if (InputManager.isKeyReleased(Keys.P))
+                {
+                    if (currentState.Equals(GameState.Play))
+                    {
+                        currentState = GameState.Pause;
+                    }
+                    else
+                    {
+                        currentState = GameState.Play;
+                    }
+                }
+            }
+
+            InputManager.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -81,9 +150,31 @@ namespace Block_Busters
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Gray);
-
             // TODO: Add your drawing code here
+            switch (currentState)
+            {
+                case GameState.Menu:
+                    GraphicsDevice.Clear(Color.Gray);
+                    break;
+                case GameState.Play:
+                    GraphicsDevice.Clear(Color.Blue);
+                    break;
+                case GameState.Pause:
+                    GraphicsDevice.Clear(Color.Green);
+                    break;
+                case GameState.End:
+                    GraphicsDevice.Clear(Color.Red);
+                    break;
+                default: // something weird happened
+                    break;
+            }
+            states[currentState].Draw(gameTime, cameras[0]);
+            // end of 3D Drawing
+
+            // start 2D Drawing
+            spriteBatch.Begin();
+            states[currentState].Draw(gameTime, spriteBatch);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
