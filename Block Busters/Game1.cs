@@ -79,6 +79,8 @@ namespace Block_Busters
             //cameras[1].Position = whatever;
             cameras[1].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
+            ground = new ModelObject(Content.Load<Model>("Models/Plane"), Vector3.Zero);
+            ground.Parent = states[GameState.Play]; 
             // TODO: use this.Content to load your game content here
         }
 

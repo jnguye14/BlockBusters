@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\WindowsGL\Debug\</OutputPath>
+    <OutputPath>..\Build\</OutputPath>
     <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -56,17 +56,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Textures\Buttons\Back.png" />
+    <Content Include="Content\Textures\Buttons\Help.png" />
+    <Content Include="Content\Textures\Buttons\Info.png" />
+    <Content Include="Content\Textures\Buttons\Play.png" />
+    <Content Include="Content\Textures\Buttons\Quit.png" />
+    <Content Include="Content\Textures\Strips\Skeleton.png" />
     <Content Include="Icon.ico" />
     <Content Include="SDL.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Content\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{22aa0863-53cf-4394-be6f-43bf9ecb3aef}</Project>
       <Name>Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\Models\Capsule.FBX" />
+    <None Include="Content\Models\Cube.fbx" />
+    <None Include="Content\Models\Plane.fbx" />
+    <None Include="Content\Models\Sphere.FBX" />
+    <None Include="Content\Models\Torus.FBX" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
