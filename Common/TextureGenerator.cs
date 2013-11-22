@@ -63,24 +63,13 @@ namespace Common
             }
         }
 
+        // currently, not used
         public bool is2D
         {
             get;
             set;
         }
         #endregion
-
-        public float Amplitude
-        {
-            get;
-            set;
-        }
-
-        public float Frequency
-        {
-            get;
-            set;
-        }
 
         #region Constructors
         public TextureGenerator(GraphicsDevice g)
@@ -101,8 +90,6 @@ namespace Common
             TexHeight = (height <= 0) ? 1 : height;
             TexDepth = 1;
             is2D = true;
-            Amplitude = 0.6f;
-            Frequency = 0.6f;
         }
 
         public TextureGenerator(GraphicsDevice g, int width, int height, int depth)
@@ -181,7 +168,7 @@ namespace Common
         }
         #endregion
 
-        #region Marble Functions
+        #region Marble (actually Stone) Functions
         public Texture2D makeMarbleTexture()
         {
             Texture2D MarbleTexture = new Texture2D(GraphicsDevice, TexWidth, TexHeight);
@@ -201,8 +188,8 @@ namespace Common
         private double marbleFunction(float s, float t, float r)
         {
             // varying amplitude and frequency
-            float amplitude = Amplitude;//0.6f;// +a;
-            float frequency = Frequency;//0.6f;// +f;
+            float amplitude = 0.3f;
+            float frequency = 0.8f;
 
             // define constants
             int n = 2; // number of octaves
@@ -215,19 +202,60 @@ namespace Common
             toReturn = amplitude * toReturn + amplitude * amplitude * toReturn + amplitude * amplitude * amplitude * toReturn + amplitude * amplitude * amplitude * amplitude * toReturn;
             toReturn = Math.Sin(20 * 1 + s * toReturn) + Math.Sin(20 * 2 + s * toReturn) + Math.Sin(20 * 3 + s * toReturn) + Math.Sin(20 * 4 + s * toReturn);
 
-            // scale between 0 and 1 (same as mod 1)
+            // scale between 0 and 1
             return toReturn % 1.0f;
-            //toReturn = (toReturn < 1.0f) ? toReturn : 1.0f;
-            //toReturn = (toReturn > 0.0f) ? toReturn : 0.0f;
-            //return toReturn;
-
-            //double integerPart; // don't care about
-            //return modf(toReturn, &integerPart);
         }
 
         private Color MarbleMap(float a)
         {
             return linearInterpolation(a, Color.White, Color.Black);
+        }
+        #endregion
+
+        #region Glass Functions (same as marble except different amplitude, frequency, and colors)
+        public Texture2D makeGlassTexture()
+        {
+            Texture2D GlassTexture = new Texture2D(GraphicsDevice, TexWidth, TexHeight);
+            Color[] data = new Color[TexWidth * TexHeight];
+            for (int i = 0; i < TexHeight; i++)
+            {
+                for (int j = 0; j < TexWidth; j++)
+                {
+                    double num = glassFunction(i / (float)TexHeight, j / (float)TexWidth, 0);
+                    data[i * TexWidth + j] = GlassMap((float)num);
+                }
+            }
+            GlassTexture.SetData<Color>(data);
+            return GlassTexture;
+        }
+
+        // same as marble function, except with set amplitude and frequency
+        private double glassFunction(float s, float t, float r)
+        {
+            // amplitude and frequency
+            float amplitude = 0.5f;
+            float frequency = 0.5f;
+
+            // define constants
+            int n = 2; // number of octaves
+            float alpha = 2.0f; // weight when sum is formed, approching 1 is noisier
+            float beta = 2.0f; // harmonic scaling/spacing
+            float scale = 5.0f;
+
+            double toReturn;
+            toReturn = Perlin.PerlinNoise2D(frequency * scale * s, frequency * scale * t, alpha, beta, n);
+            toReturn = amplitude * toReturn + amplitude * amplitude * toReturn + amplitude * amplitude * amplitude * toReturn + amplitude * amplitude * amplitude * amplitude * toReturn;
+            toReturn = Math.Sin(20 * 1 + s * toReturn) + Math.Sin(20 * 2 + s * toReturn) + Math.Sin(20 * 3 + s * toReturn) + Math.Sin(20 * 4 + s * toReturn);
+
+            // scale between 0 and 1
+            return toReturn % 1.0f;
+        }
+
+        private Color GlassMap(float a)
+        {
+            Color ClearWhite = new Color(200, 200, 200, 50);
+            Color SubtleBlack = new Color(100, 100, 100, 100);
+            return linearInterpolation(a, ClearWhite, SubtleBlack);
         }
         #endregion
     }
