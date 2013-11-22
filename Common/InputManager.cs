@@ -9,11 +9,18 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Common
 {
+    public enum MouseButtons
+    {
+        Left = 1,
+        Right = 1 << 1,
+        Middle = 1 << 2
+    }
+
     public static class InputManager
     {
         //public static event EventHandler<EventArgs> MyEvent; // going to implement for shift, ctrl, etc.
 
-        #region State Properties: PreviousKeyboardState, CurrentKeyboardState, PreviousMouseState, and CurrentMouseState
+        #region Keyboard State Properties: PreviousKeyboardState, CurrentKeyboardState
         public static KeyboardState PreviousKeyboardState
         {
             get;
@@ -25,7 +32,9 @@ namespace Common
             get;
             set;
         }
+        #endregion
 
+        #region Mouse State Properties: PreviousMouseState, CurrentMouseState, MousePosition, PreviousMouseValue and CurrentMouseValue
         public static MouseState PreviousMouseState
         {
             get;
@@ -37,7 +46,6 @@ namespace Common
             get;
             set;
         }
-        #endregion
 
         public static Vector2 MousePosition
         {
@@ -47,15 +55,31 @@ namespace Common
             }
         }
 
+        private static int PreviousMouseValue
+        {
+            get;
+            set;
+        }
+
+        private static int CurrentMouseValue
+        {
+            get;
+            set;
+        }
+        #endregion
+
         public static void Initialize()
         {
             // keyboard states
             CurrentKeyboardState = Keyboard.GetState();
             PreviousKeyboardState = CurrentKeyboardState;
-        
+
             // mouse states
             CurrentMouseState = Mouse.GetState();
             PreviousMouseState = CurrentMouseState;
+
+            CurrentMouseValue = MakeMouseValue(CurrentMouseState);
+            PreviousMouseValue = CurrentMouseValue;
         }
 
         public static void Update(GameTime gameTime)
@@ -63,77 +87,65 @@ namespace Common
             // set previous states
             PreviousKeyboardState = CurrentKeyboardState;
             PreviousMouseState = CurrentMouseState;
+            PreviousMouseValue = CurrentMouseValue;
 
             // get new states
             CurrentKeyboardState = Keyboard.GetState();
             CurrentMouseState = Mouse.GetState();
+            CurrentMouseValue = MakeMouseValue(CurrentMouseState);
         }
 
-        #region Left Mouse Button methods
-        public static bool isLeftClickUp()
+        #region Mouse Button methods
+        private static int MakeMouseValue(MouseState mouseState)
         {
-            return (CurrentMouseState.LeftButton == ButtonState.Released);
+            return ((mouseState.LeftButton == ButtonState.Pressed) ? (int)MouseButtons.Left : 0) |
+                    ((mouseState.RightButton == ButtonState.Pressed) ? (int)MouseButtons.Right : 0) |
+                    ((mouseState.MiddleButton == ButtonState.Pressed) ? (int)MouseButtons.Middle : 0);
         }
 
-        public static bool isLeftClickDown()
+        public static bool IsButtonUp(MouseButtons button)
         {
-            return (CurrentMouseState.LeftButton == ButtonState.Pressed);
+            return (CurrentMouseValue & (int)button) == 0;
         }
 
-        public static bool isLeftClickPressed()
+        public static bool IsButtonDown(MouseButtons button)
         {
-            return (PreviousMouseState.LeftButton == ButtonState.Released) && isLeftClickDown();
+            return (CurrentMouseValue & (int)button) > 0;
         }
 
-        public static bool isLeftClickReleased()
+        public static bool IsButtonPressed(MouseButtons button)
         {
-            return (PreviousMouseState.LeftButton == ButtonState.Pressed) && isLeftClickUp();
-        }
-        #endregion
-
-        #region Right Mouse Button methods
-        public static bool isRightClickUp()
-        {
-            return (CurrentMouseState.RightButton == ButtonState.Released);
+            // ^ is equivalent to XOR
+            return (((PreviousMouseValue ^ CurrentMouseValue) & CurrentMouseValue) & (int)button) > 0;
         }
 
-        public static bool isRightClickDown()
+        public static bool IsButtonReleased(MouseButtons button)
         {
-            return (CurrentMouseState.RightButton == ButtonState.Pressed);
-        }
-
-        public static bool isRightClickPressed()
-        {
-            return (PreviousMouseState.RightButton == ButtonState.Released) && isRightClickDown();
-        }
-
-        public static bool isRightClickReleased()
-        {
-            return (PreviousMouseState.RightButton == ButtonState.Pressed) && isRightClickUp();
+            return (((PreviousMouseValue ^ CurrentMouseValue) & PreviousMouseValue) & (int)button) > 0;
         }
         #endregion
 
         #region Keyboard Button methods
         // standard keyboard state method
-        public static bool isKeyUp(Keys key)
+        public static bool IsKeyUp(Keys key)
         {
             return CurrentKeyboardState.IsKeyUp(key);
         }
 
         // standard keyboard state method
-        public static bool isKeyDown(Keys key)
+        public static bool IsKeyDown(Keys key)
         {
             return CurrentKeyboardState.IsKeyDown(key);
         }
 
         // was the key pressed? (up-down)
-        public static bool isKeyPressed(Keys key)
+        public static bool IsKeyPressed(Keys key)
         {
             return PreviousKeyboardState.IsKeyUp(key) && CurrentKeyboardState.IsKeyDown(key);
         }
 
         // was the key was typed? (down-up)
-        public static bool isKeyReleased(Keys key)
+        public static bool IsKeyReleased(Keys key)
         {
             return PreviousKeyboardState.IsKeyDown(key) && CurrentKeyboardState.IsKeyUp(key);
         }
@@ -141,68 +153,68 @@ namespace Common
 
         #region Modifier Keys
         #region Shift Key methods
-        public static bool isShiftUp()
+        public static bool IsShiftUp()
         {
-            return isKeyUp(Keys.LeftShift) || isKeyUp(Keys.RightShift);
+            return IsKeyUp(Keys.LeftShift) || IsKeyUp(Keys.RightShift);
         }
 
-        public static bool isShiftDown()
+        public static bool IsShiftDown()
         {
-            return isKeyDown(Keys.LeftShift) || isKeyDown(Keys.RightShift);
+            return IsKeyDown(Keys.LeftShift) || IsKeyDown(Keys.RightShift);
         }
 
-        public static bool isShiftPressed()
+        public static bool IsShiftPressed()
         {
-            return isKeyPressed(Keys.LeftShift) || isKeyPressed(Keys.RightShift);
+            return IsKeyPressed(Keys.LeftShift) || IsKeyPressed(Keys.RightShift);
         }
 
-        public static bool isShiftReleased()
+        public static bool IsShiftReleased()
         {
-            return isKeyReleased(Keys.LeftShift) || isKeyReleased(Keys.RightShift);
+            return IsKeyReleased(Keys.LeftShift) || IsKeyReleased(Keys.RightShift);
         }
         #endregion
 
         #region Alt Key methods
-        public static bool isAltUp()
+        public static bool IsAltUp()
         {
-            return isKeyUp(Keys.LeftAlt) || isKeyUp(Keys.RightAlt);
+            return IsKeyUp(Keys.LeftAlt) || IsKeyUp(Keys.RightAlt);
         }
 
         public static bool isAltDown()
         {
-            return isKeyDown(Keys.LeftAlt) || isKeyDown(Keys.RightAlt);
+            return IsKeyDown(Keys.LeftAlt) || IsKeyDown(Keys.RightAlt);
         }
 
         public static bool isAltPressed()
         {
-            return isKeyPressed(Keys.LeftAlt) || isKeyPressed(Keys.RightAlt);
+            return IsKeyPressed(Keys.LeftAlt) || IsKeyPressed(Keys.RightAlt);
         }
 
         public static bool isAltReleased()
         {
-            return isKeyReleased(Keys.LeftAlt) || isKeyReleased(Keys.RightAlt);
+            return IsKeyReleased(Keys.LeftAlt) || IsKeyReleased(Keys.RightAlt);
         }
         #endregion
 
         #region Ctrl Key methods
-        public static bool isCtrlUp()
+        public static bool IsCtrlUp()
         {
-            return isKeyUp(Keys.LeftControl) || isKeyUp(Keys.RightControl);
+            return IsKeyUp(Keys.LeftControl) || IsKeyUp(Keys.RightControl);
         }
 
-        public static bool isCtrlDown()
+        public static bool IsCtrlDown()
         {
-            return isKeyDown(Keys.LeftControl) || isKeyDown(Keys.RightControl);
+            return IsKeyDown(Keys.LeftControl) || IsKeyDown(Keys.RightControl);
         }
 
-        public static bool isCtrlPressed()
+        public static bool IsCtrlPressed()
         {
-            return isKeyPressed(Keys.LeftControl) || isKeyPressed(Keys.RightControl);
+            return IsKeyPressed(Keys.LeftControl) || IsKeyPressed(Keys.RightControl);
         }
 
-        public static bool isCtrlReleased()
+        public static bool IsCtrlReleased()
         {
-            return isKeyReleased(Keys.LeftControl) || isKeyReleased(Keys.RightControl);
+            return IsKeyReleased(Keys.LeftControl) || IsKeyReleased(Keys.RightControl);
         }
         #endregion
         #endregion
