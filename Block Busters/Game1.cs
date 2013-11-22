@@ -31,6 +31,7 @@ namespace Block_Busters
         GameState currentState;
 
         ModelObject ground;
+        ModelObject[] cubes;
         Camera[] cameras;
 
         public Game1()
@@ -72,7 +73,7 @@ namespace Block_Busters
             // set up cameras
             cameras = new Camera[2];
             cameras[0] = new Camera();
-            //cameras[0].Position = whatever; 
+            cameras[0].Position = new Vector3(0, 0, 10); 
             //cameras[0].RotateX = -MathHelper.PiOver2; // to look down
             cameras[0].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
             cameras[1] = new Camera();
@@ -80,7 +81,21 @@ namespace Block_Busters
             cameras[1].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
 
             ground = new ModelObject(Content.Load<Model>("Models/Plane"), Vector3.Zero);
-            ground.Parent = states[GameState.Play]; 
+            ground.Position = new Vector3(0, -1, 0);
+            ground.Parent = states[GameState.Play];
+
+            TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
+
+            cubes = new ModelObject[3];
+            cubes[0] = new ModelObject(Content.Load<Model>("Models/Cube"), Vector3.Up*2);
+            cubes[0].Texture = generator.makeGlassTexture();
+            cubes[0].Parent = states[GameState.Play];
+            cubes[1] = new ModelObject(cubes[0].Model, Vector3.Right);
+            cubes[1].Texture = generator.makeWoodTexture();
+            cubes[1].Parent = states[GameState.Play];
+            cubes[2] = new ModelObject(cubes[0].Model, Vector3.Left);
+            cubes[2].Texture = generator.makeMarbleTexture();
+            cubes[2].Parent = states[GameState.Play];
             // TODO: use this.Content to load your game content here
         }
 
@@ -108,19 +123,19 @@ namespace Block_Busters
             states[currentState].Update(gameTime, Matrix.Identity);
 
             // to go directly to game state
-            if (InputManager.isKeyReleased(Keys.D1))
+            if (InputManager.IsKeyReleased(Keys.D1))
             {
                 currentState = GameState.Menu;
             }
-            if (InputManager.isKeyReleased(Keys.D2))
+            if (InputManager.IsKeyReleased(Keys.D2))
             {
                 currentState = GameState.Play;
             }
-            if (InputManager.isKeyReleased(Keys.D3))
+            if (InputManager.IsKeyReleased(Keys.D3))
             {
                 currentState = GameState.Pause;
             }
-            if (InputManager.isKeyReleased(Keys.D4))
+            if (InputManager.IsKeyReleased(Keys.D4))
             {
                 currentState = GameState.End;
             }
@@ -129,7 +144,7 @@ namespace Block_Busters
             // P to Pause
             if (currentState.Equals(GameState.Play) || currentState.Equals(GameState.Pause))
             {
-                if (InputManager.isKeyReleased(Keys.P))
+                if (InputManager.IsKeyReleased(Keys.P))
                 {
                     if (currentState.Equals(GameState.Play))
                     {
