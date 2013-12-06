@@ -103,10 +103,11 @@ namespace Common
         }
         #endregion
 
+        /*// same as: Color.Lerp(color1, color2, alpha);
         public Color linearInterpolation(float alpha, Color color1, Color color2)
         {
             return new Color(((1.0f - alpha) * color1.ToVector4() + alpha * color2.ToVector4()));
-        }
+        }//*/
 
         // returns a single white texel as a texture
         public Texture2D makeBlank()
@@ -162,7 +163,8 @@ namespace Common
         {
             Color earlywood = new Color(156, 77, 26, 255); // brown
             Color latewood = new Color(102, 51, 18, 255); // tan
-            return linearInterpolation(a, earlywood, latewood);
+            return Color.Lerp(earlywood, latewood, a);
+            //return linearInterpolation(a, earlywood, latewood);
         }
         #endregion
 
@@ -206,7 +208,8 @@ namespace Common
 
         private Color MarbleMap(float a)
         {
-            return linearInterpolation(a, Color.White, Color.Black);
+            return Color.Lerp(Color.White, Color.Black, a);
+            //return linearInterpolation(a, Color.White, Color.Black);
         }
         #endregion
 
@@ -253,7 +256,8 @@ namespace Common
         {
             Color ClearWhite = new Color(200, 200, 200, 50);
             Color SubtleBlack = new Color(100, 100, 100, 100);
-            return linearInterpolation(a, ClearWhite, SubtleBlack);
+            return Color.Lerp(ClearWhite, SubtleBlack, a);
+            //return linearInterpolation(a, ClearWhite, SubtleBlack);
         }
         #endregion
     }
