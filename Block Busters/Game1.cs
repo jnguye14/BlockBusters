@@ -38,8 +38,12 @@ namespace Block_Busters
 
         ModelObject ground;
         Cannon cannon;
-        ModelObject[] cubes;
+        Model ball;
+        List<Cannonball> cannonballs = new List<Cannonball>();
+
+        Block[] cubes;
         Camera[] cameras;
+        int curCamera; // index of current cammera
 
         AudioListener listener = new AudioListener();
         AudioEmitter cannonEmitter = new AudioEmitter();
@@ -108,11 +112,13 @@ namespace Block_Busters
             cameras = new Camera[2];
             cameras[0] = new Camera();
             cameras[0].Position = new Vector3(0, 0, 10); 
-            //cameras[0].RotateX = -MathHelper.PiOver2; // to look down
             cameras[0].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
             cameras[1] = new Camera();
-            //cameras[1].Position = whatever;
+            cameras[1].RotateX = -MathHelper.PiOver2; // to look down
+            cameras[1].Position = new Vector3(0,10,0);
             cameras[1].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
+            curCamera = 0; // 0 = behind the cannon
+            // 1 = top-down view
 
             #endregion
 
@@ -120,24 +126,29 @@ namespace Block_Busters
 
             ground = new ModelObject(Content.Load<Model>("Models/Plane"), Vector3.Zero);
             ground.Position = new Vector3(0, -1, 0);
+            ground.Scale *= 10.0f;
             ground.Parent = states[GameState.Play];
 
             TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
 
-            cannon = new Cannon(Content.Load<Model>("Models/Torus"), generator.makeBlank(), new Vector3(0,0,5));
+            // load cannon
+            cannon = new Cannon(Content.Load<Model>("Models/Torus"), Content.Load<Texture2D>("Textures/Stripes"), generator.makeBlank(), new Vector3(0, 0, 5));
             cannon.Parent = states[GameState.Play];
+            cannon.FireEvent += FireCannon;
+            ball = Content.Load<Model>("Models/Sphere");
 
-            cubes = new ModelObject[3];
-            cubes[0] = new ModelObject(Content.Load<Model>("Models/Cube"), Vector3.Up*2);
+            // create the blocks (probably better if it was in a method of its own)
+            Model cube = Content.Load<Model>("Models/Cube");
+            cubes = new Block[3];
+            cubes[0] = new Block(cube, Vector3.Up * 2, Block.Type.Glass);
             cubes[0].Texture = generator.makeGlassTexture();
             cubes[0].Parent = states[GameState.Play];
-            cubes[1] = new ModelObject(cubes[0].Model, Vector3.Right);
+            cubes[1] = new Block(cube, Vector3.Right, Block.Type.Wood);
             cubes[1].Texture = generator.makeWoodTexture();
             cubes[1].Parent = states[GameState.Play];
-            cubes[2] = new ModelObject(cubes[0].Model, Vector3.Left);
+            cubes[2] = new Block(cube, Vector3.Left, Block.Type.Stone);
             cubes[2].Texture = generator.makeMarbleTexture();
             cubes[2].Parent = states[GameState.Play];
-
             #endregion
 
             #region GUI Intialization
@@ -248,6 +259,31 @@ namespace Block_Busters
                 }
             }
 
+            // Tab to switch cameras
+            if (InputManager.IsKeyPressed(Keys.Tab) && currentState.Equals(GameState.Play))
+            {
+                curCamera = (curCamera+1) % 2;
+            }
+
+            if (currentState.Equals(GameState.Play))
+            {
+                // used a reverse for loop so the game doesn't crash when the cannonball explodes (ironic)
+                for (int i = cannonballs.Count - 1; i > -1; i--)
+                {
+                    Cannonball b = cannonballs[i];
+                    b.Update(gameTime);
+                    foreach (Block c in cubes)
+                    {
+                        if (c.DidCollide(b))
+                        {
+                            // SFX: play collision sound based on block type (glass, wood, stone)
+                            c.CurrentState = Block.State.Moved;
+                            b.Explode();
+                        }
+                    }
+                }
+            }
+
             InputManager.Update(gameTime);
             base.Update(gameTime);
         }
@@ -258,6 +294,8 @@ namespace Block_Busters
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            GraphicsDevice.DepthStencilState.DepthBufferEnable = true;
+            GraphicsDevice.DepthStencilState.DepthBufferWriteEnable = true;
             // TODO: Add your drawing code here
             switch (currentState)
             {
@@ -279,11 +317,26 @@ namespace Block_Busters
             if (currentState == GameState.Pause)
             {
 
-                states[GameState.Play].Draw(gameTime, cameras[0]);
-                states[currentState].Draw(gameTime, cameras[0]);
+                states[GameState.Play].Draw(gameTime, cameras[curCamera]);
+                states[currentState].Draw(gameTime, cameras[curCamera]);
+                foreach (Cannonball b in cannonballs)
+                {
+                    b.Draw(gameTime, cameras[curCamera]);
+                }
             }
+            
+
+            if (currentState.Equals(GameState.Play))
+            {
+                states[currentState].Draw(gameTime, cameras[curCamera]);
+                foreach (Cannonball b in cannonballs)
+                {
+                    b.Draw(gameTime, cameras[curCamera]);
+                }
+            }
+
             else
-                states[currentState].Draw(gameTime, cameras[0]);
+                states[currentState].Draw(gameTime, cameras[curCamera]);
             // end of 3D Drawing
 
             // start 2D Drawing
@@ -321,6 +374,31 @@ namespace Block_Busters
         private void ToMenu(object sender, EventArgs args)
         {
             currentState = GameState.Menu;
+        }
+
+        private void FireCannon(object sender, EventArgs args)
+        {
+            // SFX: play fire cannon sound
+
+            // create cannonball
+            Cannonball cb = new Cannonball(ball, cannon.Position, cannon.Forward, cannon.PowerBar.CurrentFillAmount);
+            cb.ExplodeEvent += Explosion;
+            cannonballs.Add(cb);
+
+            // decrease number of cannon fire's left
+        }
+
+        private void Explosion(object sender, EventArgs args)
+        {
+            // SFX: play the explosion sound
+
+            // create smoke/fire particle effects (if time permits)
+
+            // remove the cannonball
+            cannonballs.Remove((Cannonball)sender);
+
+            // for testing:
+            Console.WriteLine("Exploded");
         }
     }       
 }

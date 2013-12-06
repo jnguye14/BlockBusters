@@ -6,10 +6,11 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Common;
 using Common.GUI;
 #endregion
 
-namespace Common
+namespace Block_Busters
 {
     public class Cannon : ModelObject
     {
@@ -42,8 +43,9 @@ namespace Common
         }
         #endregion
 
-        public Cannon(Model model, Texture2D image, Vector3 position) : base(model, position)
+        public Cannon(Model model, Texture2D texture, Texture2D image, Vector3 position) : base(model, position)
         {
+            Texture = texture;
             Angle = 0.0f;
             MovementSpeed = 2.0f;
             FillSpeed = 100.0f;
@@ -118,11 +120,6 @@ namespace Common
         public void FireBall()
         {
             OnFireEvent();
-            // fire ball based on power, elevation angle, and turn position
-            float power = PowerBar.CurrentFillAmount;
-            float elevation = Rotation.X;
-            float turn = Rotation.Y;
-            Console.WriteLine("Power: " + power + ";\tElevation: " + elevation + ";\t Turn: " + turn);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch, Matrix parentTransform)
