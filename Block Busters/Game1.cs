@@ -2,12 +2,16 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Media;
 using Common;
+using Common.GUI;
+using Common.Shapes;
 #endregion
 
 namespace Block_Busters
@@ -30,9 +34,27 @@ namespace Block_Busters
         Dictionary<GameState, Transform> states;
         GameState currentState;
 
+        SpriteFont segoeFont;
+
         ModelObject ground;
         ModelObject[] cubes;
         Camera[] cameras;
+
+        AudioListener listener = new AudioListener();
+        AudioEmitter cannonEmitter = new AudioEmitter();
+        AudioEmitter breakEmitter = new AudioEmitter();
+        AudioEmitter clickEmitter = new AudioEmitter();
+
+        SoundEffect click;
+        SoundEffect cannonShot;
+        SoundEffect breaking;
+
+        Button playButton;
+        Button menuButton;
+        Button quitButton;
+
+        ButtonGroup mainMenuButtons;
+        ButtonGroup pauseMenuButtons;
 
         public Game1()
             : base()
@@ -70,7 +92,16 @@ namespace Block_Busters
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // set up cameras
+            segoeFont = Content.Load<SpriteFont>("Fonts/Segoe");
+
+            #region Sound Intialization
+
+            click = Content.Load<SoundEffect>("Sounds/click_tiny");
+            cannonShot = Content.Load<SoundEffect>("Sounds/cannon");
+
+            #endregion
+
+            #region Camera Initialization
             cameras = new Camera[2];
             cameras[0] = new Camera();
             cameras[0].Position = new Vector3(0, 0, 10); 
@@ -79,6 +110,10 @@ namespace Block_Busters
             cameras[1] = new Camera();
             //cameras[1].Position = whatever;
             cameras[1].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
+
+            #endregion
+
+            #region Game Objects Initialization
 
             ground = new ModelObject(Content.Load<Model>("Models/Plane"), Vector3.Zero);
             ground.Position = new Vector3(0, -1, 0);
@@ -96,6 +131,41 @@ namespace Block_Busters
             cubes[2] = new ModelObject(cubes[0].Model, Vector3.Left);
             cubes[2].Texture = generator.makeMarbleTexture();
             cubes[2].Parent = states[GameState.Play];
+
+            #endregion
+
+            #region GUI Intialization
+
+            playButton = new Button(40, 30, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            playButton.MouseDown += PlayGame;
+            playButton.TextColor = Color.Black;
+            playButton.HoverColor = Color.YellowGreen;
+            playButton.Text = "Play";
+
+            quitButton = new Button(40, 100, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            quitButton.MouseDown += QuitGame;
+            quitButton.TextColor = Color.Black;
+            quitButton.HoverColor = Color.YellowGreen;
+            quitButton.Text = "Quit";
+
+            menuButton = new Button(40, 170, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            menuButton.MouseDown += ToMenu;
+            menuButton.TextColor = Color.Black;
+            menuButton.HoverColor = Color.YellowGreen;
+            menuButton.Text = "Main Menu";
+
+            mainMenuButtons = new ButtonGroup(Color.YellowGreen, click);
+            mainMenuButtons.addButton(playButton);
+            mainMenuButtons.addButton(quitButton);
+            mainMenuButtons.Parent = states[GameState.Menu];
+
+            pauseMenuButtons = new ButtonGroup(Color.YellowGreen, click);
+            pauseMenuButtons.addButton(playButton);
+            pauseMenuButtons.addButton(menuButton);
+            pauseMenuButtons.Parent = states[GameState.Pause];
+            #endregion GUI Intialization
+
+            
             // TODO: use this.Content to load your game content here
         }
 
@@ -122,6 +192,16 @@ namespace Block_Busters
             states[currentState].Update(gameTime);
             states[currentState].Update(gameTime, Matrix.Identity);
 
+            #region Sound listeners and emitters
+            listener.Position = cameras[0].Position;
+            listener.Up = cameras[0].Up;
+            listener.Forward = cameras[0].Forward;
+
+            clickEmitter.Position = cameras[0].Position;                             //Sound business
+            clickEmitter.Up = cameras[0].Up;
+            clickEmitter.Forward = cameras[0].Forward;
+            #endregion
+
             // to go directly to game state
             if (InputManager.IsKeyReleased(Keys.D1))
             {
@@ -140,6 +220,7 @@ namespace Block_Busters
                 currentState = GameState.End;
             }
 
+      
 
             // P to Pause
             if (currentState.Equals(GameState.Play) || currentState.Equals(GameState.Pause))
@@ -195,5 +276,20 @@ namespace Block_Busters
 
             base.Draw(gameTime);
         }
-    }
+
+        private void QuitGame(object sender, EventArgs args)
+        {
+            Exit();
+        }
+
+        private void PlayGame(object sender, EventArgs args)
+        {
+            currentState = GameState.Play;
+        }
+
+        private void ToMenu(object sender, EventArgs args)
+        {
+            currentState = GameState.Menu;
+        }
+    }       
 }
