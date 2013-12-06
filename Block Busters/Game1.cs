@@ -57,6 +57,8 @@ namespace Block_Busters
         ButtonGroup mainMenuButtons;
         ButtonGroup pauseMenuButtons;
 
+        GUIElement pausePanel;
+
         public Game1()
             : base()
         {
@@ -140,7 +142,11 @@ namespace Block_Busters
 
             #region GUI Intialization
 
-            playButton = new Button(40, 30, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            pausePanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 150);
+            pausePanel.Position = new Vector3(0,20,-1);
+            pausePanel.Parent = states[GameState.Pause];
+
+            playButton = new Button(40, 50, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             playButton.MouseDown += PlayGame;
             playButton.TextColor = Color.Black;
             playButton.HoverColor = Color.YellowGreen;
@@ -152,7 +158,7 @@ namespace Block_Busters
             quitButton.HoverColor = Color.YellowGreen;
             quitButton.Text = "Quit";
 
-            menuButton = new Button(40, 170, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            menuButton = new Button(40, 100, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             menuButton.MouseDown += ToMenu;
             menuButton.TextColor = Color.Black;
             menuButton.HoverColor = Color.YellowGreen;
@@ -256,13 +262,13 @@ namespace Block_Busters
             switch (currentState)
             {
                 case GameState.Menu:
-                    GraphicsDevice.Clear(Color.Gray);
+                    GraphicsDevice.Clear(Color.Violet);
                     break;
                 case GameState.Play:
                     GraphicsDevice.Clear(Color.Blue);
                     break;
                 case GameState.Pause:
-                    GraphicsDevice.Clear(Color.Green);
+                    GraphicsDevice.Clear(Color.Gray);
                     break;
                 case GameState.End:
                     GraphicsDevice.Clear(Color.Red);
@@ -270,11 +276,32 @@ namespace Block_Busters
                 default: // something weird happened
                     break;
             }
-            states[currentState].Draw(gameTime, cameras[0]);
+            if (currentState == GameState.Pause)
+            {
+
+                states[GameState.Play].Draw(gameTime, cameras[0]);
+                states[currentState].Draw(gameTime, cameras[0]);
+            }
+            else
+                states[currentState].Draw(gameTime, cameras[0]);
             // end of 3D Drawing
 
             // start 2D Drawing
             spriteBatch.Begin();
+            if (currentState == GameState.Pause)
+            {
+                spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(0, 0), Color.Black);
+            }
+
+            if (currentState == GameState.End)
+            {
+                spriteBatch.DrawString(segoeFont, "GAME OVER", new Vector2(200, 0), Color.Black);
+            }
+
+            if (currentState == GameState.Menu)
+            {
+                spriteBatch.DrawString(segoeFont, "Block Buster!", new Vector2(00, 0), Color.Black);
+            }
             states[currentState].Draw(gameTime, spriteBatch);
             spriteBatch.End();
 
