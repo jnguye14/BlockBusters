@@ -59,28 +59,82 @@ namespace Common
         }
         #endregion
 
-        #region Rotate Property/Functions: RotateX, RotateY, and RotateZ
+        #region Rotate Property/Functions
+        #region RotatePitch, RotateYaw, and RotateRoll
+        public float RotatePitch // right
+        {
+            set
+            {
+                Rotation = Quaternion.CreateFromAxisAngle(Right, value) * Rotation;
+            }
+        }
+
+        public float RotateYaw // up
+        {
+            set
+            {
+                Rotation = Quaternion.CreateFromAxisAngle(Up, value) * Rotation;
+            }
+        }
+
+        public float RotateRoll // forward
+        {
+            set
+            {
+                Rotation = Quaternion.CreateFromAxisAngle(Forward, value) * Rotation;
+            }
+        }
+        #endregion
+
+        #region RotateX, RotateY, and RotateZ
         public float RotateX
         {
             set
             {
-                Rotation = Quaternion.CreateFromAxisAngle(Vector3.Right, value) * Rotation; // UnitX
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitX, value) * Rotation;
             }
         }
         public float RotateY
         {
             set
             {
-                Rotation = Quaternion.CreateFromAxisAngle(Vector3.Up, value) * Rotation; // UnitY
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, value) * Rotation;
             }
         }
         public float RotateZ
         {
             set
             {
-                Rotation = Quaternion.CreateFromAxisAngle(Vector3.Forward, value) * Rotation; // UnitZ
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, value) * Rotation;
             }
         }
+        #endregion
+
+        #region RotateRight, RotateUp, RotateForward
+        public float RotateRight
+        {
+            set
+            {
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.Right, value) * Rotation;
+            }
+        }
+
+        public float RotateUp
+        {
+            set
+            {
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.Up, value) * Rotation;
+            }
+        }
+
+        public float RotateForward
+        {
+            set
+            {
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.Forward, value) * Rotation;
+            }
+        }
+        #endregion
         #endregion
 
         #region Inheritance Properties: Children and Parent
