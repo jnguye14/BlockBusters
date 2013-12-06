@@ -108,16 +108,14 @@ namespace Common
             return new Color(((1.0f - alpha) * color1.ToVector4() + alpha * color2.ToVector4()));
         }
 
-        public Texture makeBlank()
+        // returns a single white texel as a texture
+        public Texture2D makeBlank()
         {
-            //if (is2D)
-            //{
-            return new Texture2D(GraphicsDevice, TexWidth, TexHeight);
-            /*}
-            else
-            {
-                return new Texture3D(GraphicsDevice, TexWidth, TexHeight, TexDepth, true, SurfaceFormat.Color);
-            }//*/
+            Texture2D temp = new Texture2D(GraphicsDevice, 1, 1);
+            Color[] Data = new Color[1];
+            Data[0] = Color.White;
+            temp.SetData<Color>(Data);
+            return temp;
         }
 
         #region Wood Functions

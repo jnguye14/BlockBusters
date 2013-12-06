@@ -38,10 +38,18 @@ namespace Common.GUI
         #endregion
 
         #region Fill Properties: CurrentFillAmount, MaxFillAmount, isFillingUp
+        private float fillAmount;
         public float CurrentFillAmount
         {
-            get;
-            set;
+            get
+            {
+                return fillAmount;
+            }
+            set
+            {
+                fillAmount = value;
+                MathHelper.Clamp(fillAmount, 0.0f, MaxFillAmount);
+            }
         }
 
         public float MaxFillAmount
@@ -82,13 +90,14 @@ namespace Common.GUI
             BackgroundColor = bgColor;
             ForegroundColor = fgColor;
             MaxFillAmount = 100.0f; // 100% default
-            if (startFilled)
+            isFillingUp = !startFilled;
+            if (isFillingUp)
             {
-                CurrentFillAmount = MaxFillAmount;
+                CurrentFillAmount = 0.0f;
             }
             else
             {
-                CurrentFillAmount = 0.0f;
+                CurrentFillAmount = MaxFillAmount;
             }
         }
 
@@ -104,13 +113,14 @@ namespace Common.GUI
             BackgroundColor = bgColor;
             ForegroundColor = fgColor;
             MaxFillAmount = 100.0f; // 100% default
-            if (startFilled)
+            isFillingUp = !startFilled;
+            if (isFillingUp)
             {
-                CurrentFillAmount = MaxFillAmount;
+                CurrentFillAmount = 0.0f;
             }
             else
             {
-                CurrentFillAmount = 0.0f;
+                CurrentFillAmount = MaxFillAmount;
             }
         }
         #endregion

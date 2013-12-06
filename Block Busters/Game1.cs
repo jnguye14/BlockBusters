@@ -37,6 +37,7 @@ namespace Block_Busters
         SpriteFont segoeFont;
 
         ModelObject ground;
+        Cannon cannon;
         ModelObject[] cubes;
         Camera[] cameras;
 
@@ -120,6 +121,9 @@ namespace Block_Busters
             ground.Parent = states[GameState.Play];
 
             TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
+
+            cannon = new Cannon(Content.Load<Model>("Models/Torus"), generator.makeBlank(), new Vector3(0,0,5));
+            cannon.Parent = states[GameState.Play];
 
             cubes = new ModelObject[3];
             cubes[0] = new ModelObject(Content.Load<Model>("Models/Cube"), Vector3.Up*2);
