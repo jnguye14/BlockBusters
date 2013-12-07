@@ -11,6 +11,8 @@ namespace Block_Busters
 {
     public class Block : Rigidbody
     {
+        public event EventHandler<EventArgs> BreakEvent;
+
         public enum Type
         {
             Glass,
@@ -37,6 +39,18 @@ namespace Block_Busters
             set;
         }
 
+        public int Life
+        {
+            get;
+            set;
+        }
+
+        public bool Demolished
+        {
+            get;
+            set;
+        }
+
         #region Cube Geometry - Defines the initial position
         private Vector3[] normals;
         private Triangle[] triangles;
@@ -50,17 +64,21 @@ namespace Block_Busters
         public Block(Model model, Vector3 position, Type type) : base(model, position)
         {
             CurrentState = State.UnTouched;
+            Demolished = false;
             BlockType = type;
             switch (BlockType)
             {
                 case Type.Glass:
                     Mass = 5.0f; // default
+                    Life = 1;
                     break;
                 case Type.Wood:
                     Mass = 10.0f; // heavier than glass
+                    Life = 2;
                     break;
                 case Type.Stone:
                     Mass = 20.0f; // heavier than wood
+                    Life = 3;
                     break;
                 default:
                     break;
@@ -134,6 +152,13 @@ namespace Block_Busters
             return false;
         }
 
+        // checks if block collided with another box
+        public bool DidCollide(Block block)
+        {
+            // see: http://www.gamasutra.com/view/feature/131790/simple_intersection_tests_for_games.php?page=5
+            return false;
+        }
+
         // checks if block did collide with sphere
         public bool DidCollide(Rigidbody sphere)
         {
@@ -143,7 +168,10 @@ namespace Block_Busters
                 Vector3 normal = normals[i / 2];
                 if (Physics.TestSphereTriangle(sphere, triangles[i]))
                 {
-                    //add physics to Block depending on BlockType
+                    CurrentState = State.Moved;
+                    OnBreakEvent();
+
+                    //add physics to Block depending on BlockType?
                     switch (BlockType)
                     {
                         case Type.Glass:
@@ -155,18 +183,27 @@ namespace Block_Busters
                         default:
                             break;
                     }
-                    CurrentState = State.Moved;
-                    Impulse = sphere.Velocity / 2.0f;
-                    Acceleration = new Vector3(0.0f, -9.81f, 0.0f);
+                    //Impulse = sphere.Velocity / 2.0f;
+                    //Acceleration = new Vector3(0.0f, -9.81f, 0.0f);
 
-                    // for testing:
-                    //sphere.Velocity -= Vector3.Dot(sphere.Velocity, normal) * normal * 2.0f;
-                    //sphere.DiffuseColor = Color.Red;
                     return true;
                 }
             }
 
             return false;
+        }
+
+        protected virtual void OnBreakEvent()
+        {
+            if (--Life == 0) // decrement life
+            {
+                Demolished = true;
+            }
+
+            if (BreakEvent != null)
+            {
+                BreakEvent(this, new EventArgs());
+            }
         }
     }
 }

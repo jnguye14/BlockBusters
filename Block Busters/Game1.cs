@@ -41,7 +41,7 @@ namespace Block_Busters
         Model ball;
         List<Cannonball> cannonballs = new List<Cannonball>();
 
-        Block[] cubes;
+        List<Block> cubes = new List<Block>();
         Camera[] cameras;
         int curCamera; // index of current cammera
 
@@ -137,18 +137,9 @@ namespace Block_Busters
             cannon.FireEvent += FireCannon;
             ball = Content.Load<Model>("Models/Sphere");
 
-            // create the blocks (probably better if it was in a method of its own)
+            // create the blocks
             Model cube = Content.Load<Model>("Models/Cube");
-            cubes = new Block[3];
-            cubes[0] = new Block(cube, Vector3.Up * 2, Block.Type.Glass);
-            cubes[0].Texture = generator.makeGlassTexture();
-            cubes[0].Parent = states[GameState.Play];
-            cubes[1] = new Block(cube, Vector3.Right, Block.Type.Wood);
-            cubes[1].Texture = generator.makeWoodTexture();
-            cubes[1].Parent = states[GameState.Play];
-            cubes[2] = new Block(cube, Vector3.Left, Block.Type.Stone);
-            cubes[2].Texture = generator.makeMarbleTexture();
-            cubes[2].Parent = states[GameState.Play];
+            makeBuilding(cube);
             #endregion
 
             #region GUI Intialization
@@ -188,6 +179,53 @@ namespace Block_Busters
 
             
             // TODO: use this.Content to load your game content here
+        }
+
+        void makeBuilding(Model model)
+        {
+            // create textures
+            TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
+            Texture2D glass = generator.makeGlassTexture();
+            Texture2D wood = generator.makeWoodTexture();
+            Texture2D stone = generator.makeMarbleTexture();
+
+            // number of each block
+            int numGlass = 1;
+            int numWood = 1;
+            int numStone = 1;
+
+            // add glass blocks to cubes list
+            for (int i = 0; i < numGlass; i++)
+            {
+                // position should vary
+                Block block = new Block(model, Vector3.Up * 2, Block.Type.Glass);
+                block.Texture = glass;
+                block.Parent = states[GameState.Play];
+                block.BreakEvent += Broken;
+                cubes.Add(block);
+            }
+
+            // add wood blocks to cubes list
+            for (int i = 0; i < numWood; i++)
+            {
+                // position should vary
+                Block block = new Block(model, Vector3.Right, Block.Type.Wood);
+                block.Texture = wood;
+                block.Parent = states[GameState.Play];
+                block.BreakEvent += Broken;
+                cubes.Add(block);
+            }
+
+            // add stone blocks to cubes list
+            for (int i = 0; i < numStone; i++)
+            {
+                // position should vary
+                Block block = new Block(model, Vector3.Left, Block.Type.Stone);
+                block.Texture = stone;
+                block.Parent = states[GameState.Play];
+                block.BreakEvent += Broken;
+                cubes.Add(block);
+            }
         }
 
         /// <summary>
@@ -272,8 +310,11 @@ namespace Block_Busters
                 {
                     Cannonball b = cannonballs[i];
                     b.Update(gameTime);
-                    foreach (Block c in cubes)
+                    // used another reverse for loop so the game doesn't crash when the block breaks (double irony)
+                    for (int j = cubes.Count - 1; j > -1; j--) 
+//                        foreach (Block c in cubes)
                     {
+                        Block c = cubes[j];
                         if (c.DidCollide(b))
                         {
                             // SFX: play collision sound based on block type (glass, wood, stone)
@@ -361,6 +402,7 @@ namespace Block_Busters
             base.Draw(gameTime);
         }
 
+        #region Events
         private void QuitGame(object sender, EventArgs args)
         {
             Exit();
@@ -396,9 +438,36 @@ namespace Block_Busters
 
             // remove the cannonball
             cannonballs.Remove((Cannonball)sender);
-
-            // for testing:
-            Console.WriteLine("Exploded");
         }
+
+        private void Broken(object sender, EventArgs args)
+        {
+            Block block = (Block)sender;
+            switch (block.BlockType)
+            {
+                case Block.Type.Glass:
+                    // SFX: play breaking glass sound
+                    // increase score
+                    break;
+                case Block.Type.Wood:
+                    // SFX: play breaking wood sound
+                    // increase score
+                    break;
+                case Block.Type.Stone:
+                    // SFX: play breaking stone sound
+                    // increase score
+                    break;
+                default:
+                    break;
+            }
+
+            if (block.Demolished)
+            {
+                // increase score
+                block.Parent = null;
+                cubes.Remove(block);
+            }
+        }
+        #endregion
     }       
 }
