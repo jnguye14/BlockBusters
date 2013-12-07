@@ -44,6 +44,11 @@ namespace Block_Busters
         Block[] cubes;
         Camera[] cameras;
         int curCamera; // index of current cammera
+        
+        Skybox skybox;
+        Model skyCube;
+        TextureCube skyboxTexture;
+        Effect skyboxEffect;
 
         AudioListener listener = new AudioListener();
         AudioEmitter cannonEmitter = new AudioEmitter();
@@ -149,6 +154,14 @@ namespace Block_Busters
             cubes[2] = new Block(cube, Vector3.Left, Block.Type.Stone);
             cubes[2].Texture = generator.makeMarbleTexture();
             cubes[2].Parent = states[GameState.Play];
+
+            //SkyBox stuff
+            skyCube = Content.Load<Model>("Models/Cube");
+            skyboxTexture = Content.Load<TextureCube>("Skyboxes/uffizi");
+            skyboxEffect = Content.Load<Effect>("Skyboxes/Skybox");
+            //Effect temp = Content.Load<Effect>("Skyboxes/Skybox");
+            
+            skybox = new Skybox(skyCube,skyboxTexture,skyboxEffect);
             #endregion
 
             #region GUI Intialization
@@ -296,6 +309,7 @@ namespace Block_Busters
         {
             GraphicsDevice.DepthStencilState.DepthBufferEnable = true;
             GraphicsDevice.DepthStencilState.DepthBufferWriteEnable = true;
+            GraphicsDevice.DepthStencilState = new DepthStencilState();
             // TODO: Add your drawing code here
             switch (currentState)
             {
@@ -337,6 +351,9 @@ namespace Block_Busters
 
             else
                 states[currentState].Draw(gameTime, cameras[curCamera]);
+
+            skybox.Draw(cameras[curCamera].View, cameras[curCamera].Projection, cameras[curCamera].Position);
+            graphics.GraphicsDevice.RasterizerState = new RasterizerState();
             // end of 3D Drawing
 
             // start 2D Drawing
