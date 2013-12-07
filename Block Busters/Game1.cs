@@ -44,6 +44,11 @@ namespace Block_Busters
         List<Block> cubes = new List<Block>();
         Camera[] cameras;
         int curCamera; // index of current cammera
+        
+        Skybox skybox;
+        Model skyCube;
+        TextureCube skyboxTexture;
+        Effect skyboxEffect;
 
         AudioListener listener = new AudioListener();
         AudioEmitter cannonEmitter = new AudioEmitter();
@@ -140,6 +145,14 @@ namespace Block_Busters
             // create the blocks
             Model cube = Content.Load<Model>("Models/Cube");
             makeBuilding(cube);
+
+            //SkyBox stuff
+            skyCube = Content.Load<Model>("Models/Cube");
+            skyboxTexture = Content.Load<TextureCube>("Skyboxes/uffizi");
+            skyboxEffect = Content.Load<Effect>("Skyboxes/Skybox");
+            //Effect temp = Content.Load<Effect>("Skyboxes/Skybox");
+            
+            skybox = new Skybox(skyCube,skyboxTexture,skyboxEffect);
             #endregion
 
             #region GUI Intialization
@@ -312,7 +325,6 @@ namespace Block_Busters
                     b.Update(gameTime);
                     // used another reverse for loop so the game doesn't crash when the block breaks (double irony)
                     for (int j = cubes.Count - 1; j > -1; j--) 
-//                        foreach (Block c in cubes)
                     {
                         Block c = cubes[j];
                         if (c.DidCollide(b))
@@ -337,6 +349,7 @@ namespace Block_Busters
         {
             GraphicsDevice.DepthStencilState.DepthBufferEnable = true;
             GraphicsDevice.DepthStencilState.DepthBufferWriteEnable = true;
+            GraphicsDevice.DepthStencilState = new DepthStencilState();
             // TODO: Add your drawing code here
             switch (currentState)
             {
@@ -378,6 +391,9 @@ namespace Block_Busters
 
             else
                 states[currentState].Draw(gameTime, cameras[curCamera]);
+
+            skybox.Draw(cameras[curCamera].View, cameras[curCamera].Projection, cameras[curCamera].Position);
+            graphics.GraphicsDevice.RasterizerState = new RasterizerState();
             // end of 3D Drawing
 
             // start 2D Drawing

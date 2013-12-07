@@ -50,7 +50,8 @@ namespace Common
             Model.CopyAbsoluteBoneTransformsTo(transforms);
             foreach (ModelMesh mesh in Model.Meshes)
             {
-                foreach (BasicEffect effect in mesh.Effects)
+                foreach (
+                    BasicEffect effect in mesh.Effects)
                 {
                     if (Texture != null)
                     {
