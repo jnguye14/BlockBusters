@@ -69,6 +69,7 @@ namespace Block_Busters
         ButtonGroup mainMenuButtons;
         ButtonGroup pauseMenuButtons;
         ButtonGroup infoMenuButtons;
+        ButtonGroup gameOverMenuButtons;
 
         GUIElement pausePanel;
         GUIElement infoPanel;
@@ -193,7 +194,7 @@ namespace Block_Busters
             infoButton.HoverColor = Color.YellowGreen;
             infoButton.Text = "Info";
 
-            quitButton = new Button(40, 100, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            quitButton = new Button(40, 75, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             quitButton.MouseDown += QuitGame;
             quitButton.TextColor = Color.Black;
             quitButton.HoverColor = Color.YellowGreen;
@@ -220,7 +221,11 @@ namespace Block_Busters
             infoMenuButtons.addButton(playButton);
             infoMenuButtons.addButton(menuButton);
             infoMenuButtons.Parent = states[GameState.Info];
-            
+
+            gameOverMenuButtons = new ButtonGroup(Color.YellowGreen, click);
+            gameOverMenuButtons.addButton(menuButton);
+            gameOverMenuButtons.addButton(quitButton);
+            gameOverMenuButtons.Parent = states[GameState.End];
             #endregion GUI Intialization
             
             
@@ -230,7 +235,6 @@ namespace Block_Busters
         void makeBuilding(Model model)
         {
             // create textures
-            TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
             Texture2D glass = generator.makeGlassTexture();
             Texture2D wood = generator.makeWoodTexture();
             Texture2D stone = generator.makeMarbleTexture();
@@ -483,7 +487,8 @@ namespace Block_Busters
             {
                 spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(200, 0), Color.Black);
                 spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), Color.Black);
+                Color timeColor = (gameClock.TimeLeft <= 10) ? Color.Red : Color.Black;
+                spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), timeColor);
             }
 
             if (currentState == GameState.Info)
@@ -520,7 +525,8 @@ namespace Block_Busters
             if (currentState == GameState.Play)
             {
                 spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), Color.Black);
+                Color timeColor = (gameClock.TimeLeft <= 10) ? Color.Red : Color.Black;
+                spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), timeColor);
                 spriteBatch.DrawString(segoeFont, "Cannon Power", new Vector2(0, 400), Color.Black);
             }
             states[currentState].Draw(gameTime, spriteBatch);
