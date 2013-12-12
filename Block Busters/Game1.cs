@@ -28,7 +28,7 @@ namespace Block_Busters
         Dictionary<GameState, Transform> states;
         GameState currentState;
 
-        int level = 0;
+        int level = -1;
         int score = 100;
         Clock gameClock = new Clock();
 
@@ -163,8 +163,6 @@ namespace Block_Busters
 
             // create the blocks
             cube = Content.Load<Model>("Models/Cube");
-            makeBuilding();
-            //makeGlassBuilding();
 
             //SkyBox stuff
             skyCube = Content.Load<Model>("Models/Cube");
@@ -275,6 +273,52 @@ namespace Block_Busters
             {
                 // position should vary
                 Block block = new Block(cube, Vector3.Left, Block.Type.Stone);
+                block.Texture = stone;
+                block.Parent = states[GameState.Play];
+                block.BreakEvent += Broken;
+                cubes.Add(block);
+            }
+        }
+
+        void makeBigBuilding()
+        {
+            // create textures
+            Texture2D glass = generator.makeGlassTexture();
+            Texture2D wood = generator.makeWoodTexture();
+            Texture2D stone = generator.makeMarbleTexture();
+
+            // number of each block
+            int numGlass = 5;
+            int numWood = 5;
+            int numStone = 5;
+
+            // add glass blocks to cubes list
+            for (int i = 0; i < numGlass; i++)
+            {
+                // position should vary
+                Block block = new Block(cube, Vector3.Up * 2*i, Block.Type.Glass);
+                block.Texture = glass;
+                block.Parent = states[GameState.Play];
+                block.BreakEvent += Broken;
+                cubes.Add(block);
+            }
+
+            // add wood blocks to cubes list
+            for (int i = 0; i < numWood; i++)
+            {
+                // position should vary
+                Block block = new Block(cube, Vector3.Right * 2 + Vector3.Up * 2 * i, Block.Type.Wood);
+                block.Texture = wood;
+                block.Parent = states[GameState.Play];
+                block.BreakEvent += Broken;
+                cubes.Add(block);
+            }
+
+            // add stone blocks to cubes list
+            for (int i = 0; i < numStone; i++)
+            {
+                // position should vary
+                Block block = new Block(cube, Vector3.Left*2 + Vector3.Up * 2 * i, Block.Type.Stone);
                 block.Texture = stone;
                 block.Parent = states[GameState.Play];
                 block.BreakEvent += Broken;
@@ -567,10 +611,16 @@ namespace Block_Busters
             level++;
             switch (level)
             {
+                case 0 :
+                    makeBuilding();
+                    break;
                 case 1:
                     makeGlassBuilding();
                     break;
                 case 2:
+                    makeBigBuilding();
+                    break;
+                case 3:
                     currentState = GameState.End;
                     break;
                 default:
@@ -587,9 +637,10 @@ namespace Block_Busters
         private void PlayGame(object sender, EventArgs args)
         {
             // reset variables
-            level = 0;
+            level = -1;
             gameClock.TimeLeft = 60;
             score = 100;
+            nextLvl();
             currentState = GameState.Play;
         }
 
