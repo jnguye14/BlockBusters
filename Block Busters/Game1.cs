@@ -24,7 +24,7 @@ namespace Block_Busters
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        enum GameState { Menu, Info, Play, Pause, End }
+        enum GameState { Menu, Info, Play, Lvl1, Lvl2, Pause, End }
         Dictionary<GameState, Transform> states;
         GameState currentState;
 
@@ -94,6 +94,8 @@ namespace Block_Busters
             states[GameState.Menu] = new Transform();
             states[GameState.Info] = new Transform();
             states[GameState.Play] = new Transform();
+            states[GameState.Lvl1] = new Transform();
+            states[GameState.Lvl2] = new Transform();
             states[GameState.Pause] = new Transform();
             states[GameState.End] = new Transform();
             currentState = GameState.Menu;
@@ -162,6 +164,7 @@ namespace Block_Busters
             // create the blocks
             Model cube = Content.Load<Model>("Models/Cube");
             makeBuilding(cube);
+            makeGlassBuilding(cube);
 
             //SkyBox stuff
             skyCube = Content.Load<Model>("Models/Cube");
@@ -231,7 +234,7 @@ namespace Block_Busters
             
             // TODO: use this.Content to load your game content here
         }
-
+        #region Building Construction
         void makeBuilding(Model model)
         {
             // create textures
@@ -278,6 +281,30 @@ namespace Block_Busters
             }
         }
 
+        void makeGlassBuilding(Model model)
+        {
+            // create textures
+            Texture2D glass = generator.makeGlassTexture();
+
+
+            // number of each block
+            int numGlass = 5;
+
+            // add glass blocks to cubes list
+            for (int i = 0; i < numGlass; i++)
+            {
+                // position should vary
+                Block block = new Block(model, Vector3.Up * 2* i, Block.Type.Glass);
+                block.Texture = glass;
+                block.Parent = states[GameState.Lvl1];
+                block.BreakEvent += Broken;
+                cubes.Add(block);
+            }
+
+
+        }
+        #endregion
+
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
         /// all content.
@@ -322,7 +349,7 @@ namespace Block_Busters
             }
             if (InputManager.IsKeyReleased(Keys.D2))
             {
-                currentState = GameState.Play;
+                currentState = GameState.Lvl1;
             }
             if (InputManager.IsKeyReleased(Keys.D3))
             {
@@ -442,7 +469,7 @@ namespace Block_Busters
                     GraphicsDevice.Clear(Color.Violet);
                     break;
                 case GameState.Play:
-                    GraphicsDevice.Clear(Color.Blue);
+                    GraphicsDevice.Clear(Color.Gray);
                     break;
                 case GameState.Pause:
                     GraphicsDevice.Clear(Color.Gray);
@@ -493,12 +520,12 @@ namespace Block_Busters
 
             if (currentState == GameState.Info)
             {
-                spriteBatch.DrawString(segoeFont, "How to play", new Vector2(200, 40), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Use the arrow keys to look around" , new Vector2(200, 60), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Press the tab key to switch cameras", new Vector2(200, 80), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Hold the space bar to charge the cannon", new Vector2(200, 100), Color.Black);
-                spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(200, 120), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Destroy the buildings before time runs out", new Vector2(200, 140), Color.Black);
+                spriteBatch.DrawString(segoeFont, "How to play", new Vector2(200, 60), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Use the arrow keys to look around" , new Vector2(200, 80), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Press the tab key to switch cameras", new Vector2(200, 100), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Hold the space bar to charge the cannon", new Vector2(200, 120), Color.Black);
+                spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(200, 140), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Destroy the buildings before time runs out", new Vector2(200, 160), Color.Black);
             }
 
             if (currentState == GameState.End)
@@ -527,7 +554,7 @@ namespace Block_Busters
                 spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
                 Color timeColor = (gameClock.TimeLeft <= 10) ? Color.Red : Color.Black;
                 spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), timeColor);
-                spriteBatch.DrawString(segoeFont, "Cannon Power", new Vector2(0, 400), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Cannon Power", new Vector2(0, 410), Color.Black);
             }
             states[currentState].Draw(gameTime, spriteBatch);
             spriteBatch.End();
