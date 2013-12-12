@@ -29,6 +29,7 @@ namespace Block_Busters
         GameState currentState;
 
         int score;
+        Clock gameClock = new Clock();
 
         SpriteFont segoeFont;
 
@@ -46,6 +47,8 @@ namespace Block_Busters
         Model skyCube;
         TextureCube skyboxTexture;
         Effect skyboxEffect;
+
+        TextureGenerator generator;
 
         AudioListener listener = new AudioListener();
         AudioEmitter cannonEmitter = new AudioEmitter();
@@ -139,8 +142,9 @@ namespace Block_Busters
             #endregion
 
             #region Game Objects Initialization
-            TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
+            generator = new TextureGenerator(GraphicsDevice, 256, 256);
 
+            // load ground
             ground = new ModelObject(Content.Load<Model>("Models/Plane"), Vector3.Zero);
             ground.Position = new Vector3(0, -1, 0);
             ground.Scale *= 10.0f;
@@ -349,9 +353,10 @@ namespace Block_Busters
 
             if (currentState.Equals(GameState.Play))
             {
+                gameClock.Update(gameTime);
+
                 #region First Person Camera Stuff
                 float elapsedTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
-                #region WASD Movement controls
                 if (InputManager.IsKeyDown(Keys.Up))
                 {
                     if (cameraAngle < MathHelper.PiOver2) // Vertical
@@ -377,7 +382,7 @@ namespace Block_Busters
                     cameras[2].RotateY = -elapsedTime * 2f;
                 }
                 #endregion
-#endregion
+
                 // used a reverse for loop so the game doesn't crash when the cannonball explodes (ironic)
                 for (int i = cannonballs.Count - 1; i > -1; i--)
                 {
@@ -398,7 +403,6 @@ namespace Block_Busters
                             breakEmitter.Position = c.Position;
                             breakEmitter.Up = c.Up;
                             breakEmitter.Forward = c.Forward;
-                            b.Explode();
                         }
                     }
                 }
@@ -494,6 +498,7 @@ namespace Block_Busters
             if (currentState == GameState.Play)
             {
                 spriteBatch.DrawString(segoeFont, "Your Score:" + score, new Vector2(200, 20), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Time Left:" + gameClock.TimeLeft, new Vector2(200, 40), Color.Black);
             }
             states[currentState].Draw(gameTime, spriteBatch);
             spriteBatch.End();
@@ -527,6 +532,7 @@ namespace Block_Busters
 
             // create cannonball
             Cannonball cb = new Cannonball(ball, cannon.Position, cannon.Forward, cannon.PowerBar.CurrentFillAmount);
+            cb.Texture = generator.makeMarbleTexture();
             cb.ExplodeEvent += Explosion;
             cannonballs.Add(cb);
 

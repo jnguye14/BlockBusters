@@ -49,7 +49,7 @@ namespace Block_Busters
             Angle = 0.0f;
             MovementSpeed = 2.0f;
             FillSpeed = 100.0f;
-            PowerBar = new ProgressBar(new Rectangle(50, 50, 500, 50), image, Color.White, Color.Red, false);
+            PowerBar = new ProgressBar(new Rectangle(150, 400, 500, 50), image, Color.White, Color.Red, false);
         }
 
         public override void Update(GameTime gameTime, Matrix parentTransform)
