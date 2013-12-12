@@ -532,6 +532,11 @@ namespace Block_Busters
             {
                 spriteBatch.DrawString(segoeFont, "GAME OVER", new Vector2(200, 0), Color.Black);
                 spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
+                spriteBatch.DrawString(segoeFont, " Head Designer:     Jesse McIntosh"
+                        + "\n\n Head Programmer:   Jordan Nguyen"
+                        + "\n\n Special Thanks:"
+                        + "\n                    Ravi Kammath"
+                        + "\n                    Ken Perlin", new Vector2(200, 80), Color.Black);
             }
 
             if (currentState == GameState.Menu)
