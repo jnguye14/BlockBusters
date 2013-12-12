@@ -128,13 +128,13 @@ namespace Block_Busters
             #endregion
 
             #region Game Objects Initialization
+            TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
 
             ground = new ModelObject(Content.Load<Model>("Models/Plane"), Vector3.Zero);
             ground.Position = new Vector3(0, -1, 0);
             ground.Scale *= 10.0f;
             ground.Parent = states[GameState.Play];
-
-            TextureGenerator generator = new TextureGenerator(GraphicsDevice, 256, 256);
+            ground.Texture = generator.makeGroundTexture();
 
             // load cannon
             cannon = new Cannon(Content.Load<Model>("Models/Torus"), Content.Load<Texture2D>("Textures/Stripes"), generator.makeBlank(), new Vector3(0, 0, 5));
@@ -331,7 +331,10 @@ namespace Block_Busters
                         {
                             // SFX: play collision sound based on block type (glass, wood, stone)
                             c.CurrentState = Block.State.Moved;
-                            b.Explode();
+                            if (c.BlockType != Block.Type.Glass)
+                            {
+                                b.Explode();
+                            }
                         }
                     }
                 }

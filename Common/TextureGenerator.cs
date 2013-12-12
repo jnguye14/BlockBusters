@@ -260,5 +260,70 @@ namespace Common
             //return linearInterpolation(a, ClearWhite, SubtleBlack);
         }
         #endregion
+
+        #region Ground
+        public Texture2D makeGroundTexture()
+        {
+            Texture2D groundTexture = new Texture2D(GraphicsDevice, TexWidth, TexHeight);
+            Color[] data1 = new Color[TexWidth * TexHeight];
+
+            for (int i = 0; i < TexHeight; i++)
+            {
+                for (int j = 0; j < TexWidth; j++)
+                {
+                    double num = GroundFunction(i / (float)TexHeight, j / (float)TexWidth);
+                    data1[i * TexWidth + j] = GroundMap((float)num);
+                }
+            }
+
+            groundTexture.SetData<Color>(data1);
+            return groundTexture;
+        }
+
+        public Texture2D TileTexture(Texture2D Tex, int amount)
+        {
+            Texture2D TiledTexture = new Texture2D(GraphicsDevice, TexWidth, TexHeight);
+            Color[] data = new Color[TexWidth * TexHeight];
+            Color[] oldData = new Color[TexWidth * TexHeight];
+            Tex.GetData<Color>(oldData); // not sure what happens if oldData is too small or too big
+            for (int i = 0; i < TexHeight; i++)
+            {
+                for (int j = 0; j < TexWidth; j++)
+                {
+                    int index = i * TexWidth + j;
+                    int newIndex = (index * amount) % (TexWidth * TexWidth);
+                    data[index] = oldData[newIndex];
+                }
+            }
+            TiledTexture.SetData<Color>(data);
+            return TiledTexture;
+        }
+
+        private double GroundFunction(float s, float t)
+        {
+            // varying amplitude and frequency
+            float amplitude = 0.5f;// +a;
+            float frequency = 0.5f;// +f;
+
+            // define constants
+            int n = 7; // number of octaves
+            float alpha = 2.0f; // weight when sum is formed, approching 1 is noisier
+            float beta = 2.0f; // harmonic scaling/spacing
+            float scale = 5.0f * frequency;
+
+            double toReturn = Perlin.PerlinNoise2D(scale * s, scale * t, alpha, beta, n);
+            toReturn = amplitude * toReturn + amplitude * amplitude * toReturn + amplitude * amplitude * amplitude * toReturn + amplitude * amplitude * amplitude * amplitude * toReturn;
+            toReturn = Math.Sin(20 * 1 + s * toReturn) + Math.Sin(20 * 2 + s * toReturn) + Math.Sin(20 * 3 + s * toReturn) + Math.Sin(20 * 4 + s * toReturn);
+
+            // scale between 0 and 1
+            return toReturn % 1.0f;
+        }
+
+        private Color GroundMap(float a)
+        {
+            return Color.Lerp(Color.SandyBrown, Color.SaddleBrown, a);
+            //return linearInterpolation(a, Color.SandyBrown, Color.SaddleBrown);
+        }
+        #endregion
     }
 }
