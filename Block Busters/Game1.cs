@@ -172,11 +172,11 @@ namespace Block_Busters
 
             #region GUI Intialization
 
-            pausePanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 150);
+            pausePanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 200);
             pausePanel.Position = new Vector3(0,20,-1);
             pausePanel.Parent = states[GameState.Pause];
 
-            infoPanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 150);
+            infoPanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 200);
             infoPanel.Position = new Vector3(0, 20, -1);
             infoPanel.Parent = states[GameState.Info];
             
@@ -186,13 +186,13 @@ namespace Block_Busters
             playButton.HoverColor = Color.YellowGreen;
             playButton.Text = "Play";
 
-            infoButton = new Button(40, 100, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            infoButton = new Button(40, 75, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             infoButton.MouseDown += InfoMenu;
             infoButton.TextColor = Color.Black;
             infoButton.HoverColor = Color.YellowGreen;
             infoButton.Text = "Info";
 
-            quitButton = new Button(40, 150, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            quitButton = new Button(40, 100, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             quitButton.MouseDown += QuitGame;
             quitButton.TextColor = Color.Black;
             quitButton.HoverColor = Color.YellowGreen;
@@ -212,6 +212,7 @@ namespace Block_Busters
 
             pauseMenuButtons = new ButtonGroup(Color.YellowGreen, click);
             pauseMenuButtons.addButton(playButton);
+            pauseMenuButtons.addButton(infoButton);
             pauseMenuButtons.addButton(menuButton);
             pauseMenuButtons.Parent = states[GameState.Pause];
 
@@ -304,6 +305,10 @@ namespace Block_Busters
             clickEmitter.Position = cameras[curCamera].Position;                             //Sound business
             clickEmitter.Up = cameras[curCamera].Up;
             clickEmitter.Forward = cameras[curCamera].Forward;
+
+            cannonEmitter.Position = cameras[2].Position;                             //Sound business
+            cannonEmitter.Up = cameras[2].Up;
+            cannonEmitter.Forward = cameras[2].Forward;
             #endregion
 
             // to go directly to game state
@@ -477,11 +482,12 @@ namespace Block_Busters
 
             if (currentState == GameState.Info)
             {
-                spriteBatch.DrawString(segoeFont, "How to play", new Vector2(200, 0), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Use the arrow keys to look around" , new Vector2(200, 20), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Press the tab key to switch cameras", new Vector2(200, 40), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Hold the space bar to charge the cannon", new Vector2(200, 60), Color.Black);
-                spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(200, 80), Color.Black);
+                spriteBatch.DrawString(segoeFont, "How to play", new Vector2(200, 40), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Use the arrow keys to look around" , new Vector2(200, 60), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Press the tab key to switch cameras", new Vector2(200, 80), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Hold the space bar to charge the cannon", new Vector2(200, 100), Color.Black);
+                spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(200, 120), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Destroy the buildings before time runs out", new Vector2(200, 140), Color.Black);
             }
 
             if (currentState == GameState.End)
@@ -529,7 +535,10 @@ namespace Block_Busters
         private void FireCannon(object sender, EventArgs args)
         {
             // SFX: play fire cannon sound
-
+            SoundEffectInstance cannonShotInstance = cannonShot.CreateInstance();
+            cannonShotInstance.Apply3D(listener, breakEmitter);
+            cannonShotInstance.Play();
+            cannonShotInstance.Apply3D(listener, breakEmitter);
             // create cannonball
             Cannonball cb = new Cannonball(ball, cannon.Position, cannon.Forward, cannon.PowerBar.CurrentFillAmount);
             cb.Texture = generator.makeMarbleTexture();
