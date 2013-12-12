@@ -28,7 +28,7 @@ namespace Block_Busters
         Dictionary<GameState, Transform> states;
         GameState currentState;
 
-        int score;
+        int score = 100;
         Clock gameClock = new Clock();
 
         SpriteFont segoeFont;
@@ -109,8 +109,9 @@ namespace Block_Busters
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
             segoeFont = Content.Load<SpriteFont>("Fonts/Segoe");
+
+            gameClock.TimeUpEvent += GameOver;
 
             #region Sound Intialization
 
@@ -388,6 +389,11 @@ namespace Block_Busters
                 }
                 #endregion
 
+                if (InputManager.IsKeyReleased(Keys.Space) && score <= 0)
+                {
+                    currentState = GameState.End; // game over
+                }
+
                 // used a reverse for loop so the game doesn't crash when the cannonball explodes (ironic)
                 for (int i = cannonballs.Count - 1; i > -1; i--)
                 {
@@ -477,7 +483,8 @@ namespace Block_Busters
             if (currentState == GameState.Pause)
             {
                 spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(200, 0), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Score:" + score, new Vector2(200, 20), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), Color.Black);
             }
 
             if (currentState == GameState.Info)
@@ -493,7 +500,7 @@ namespace Block_Busters
             if (currentState == GameState.End)
             {
                 spriteBatch.DrawString(segoeFont, "GAME OVER", new Vector2(200, 0), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Your Final Score:" + score , new Vector2(0, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
             }
 
             if (currentState == GameState.Menu)
@@ -503,8 +510,8 @@ namespace Block_Busters
 
             if (currentState == GameState.Play)
             {
-                spriteBatch.DrawString(segoeFont, "Your Score:" + score, new Vector2(200, 20), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Time Left:" + gameClock.TimeLeft, new Vector2(200, 40), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), Color.Black);
             }
             states[currentState].Draw(gameTime, spriteBatch);
             spriteBatch.End();
@@ -520,6 +527,9 @@ namespace Block_Busters
 
         private void PlayGame(object sender, EventArgs args)
         {
+            // reset variables
+            gameClock.TimeLeft = 60;
+            score = 100;
             currentState = GameState.Play;
         }
 
@@ -532,6 +542,12 @@ namespace Block_Busters
         {
             currentState = GameState.Info;
         }
+
+        private void GameOver(object sender, EventArgs args)
+        {
+            currentState = GameState.End;
+        }
+
         private void FireCannon(object sender, EventArgs args)
         {
             // SFX: play fire cannon sound
@@ -546,6 +562,7 @@ namespace Block_Busters
             cannonballs.Add(cb);
 
             // decrease number of cannon fire's left
+            score -= 10;
         }
 
         private void Explosion(object sender, EventArgs args)
@@ -569,8 +586,6 @@ namespace Block_Busters
                     glassHitInstance.Apply3D(listener, breakEmitter);
                     glassHitInstance.Play();
                     glassHitInstance.Apply3D(listener, breakEmitter);
-                    // increase score
-                    score += 10;
                     break;
                 case Block.Type.Wood:
                     // SFX: play breaking wood sound
@@ -578,8 +593,6 @@ namespace Block_Busters
                     woodHitInstance.Apply3D(listener, breakEmitter);
                     woodHitInstance.Play();
                     woodHitInstance.Apply3D(listener, breakEmitter);
-                    // increase score
-                    score += 10;
                     break;
                 case Block.Type.Stone:
                     // SFX: play breaking stone sound
@@ -587,8 +600,6 @@ namespace Block_Busters
                     rockHitInstance.Apply3D(listener, breakEmitter);
                     rockHitInstance.Play();
                     rockHitInstance.Apply3D(listener, breakEmitter);
-                    // increase score
-                    score += 10;
                     break;
                 default:
                     break;
@@ -597,6 +608,20 @@ namespace Block_Busters
             if (block.Demolished)
             {
                 // increase score
+                switch (block.BlockType)
+                {
+                    case Block.Type.Glass:
+                        score += 10;
+                        break;
+                    case Block.Type.Wood:
+                        score += 20;
+                        break;
+                    case Block.Type.Stone:
+                        score += 30;
+                        break;
+                    default: // something weird broke
+                        break;
+                }
                 block.Parent = null;
                 cubes.Remove(block);
             }
