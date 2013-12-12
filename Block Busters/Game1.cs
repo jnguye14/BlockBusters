@@ -207,7 +207,6 @@ namespace Block_Busters
 
             mainMenuButtons = new ButtonGroup(Color.YellowGreen, click);
             mainMenuButtons.addButton(playButton);
-            mainMenuButtons.addButton(infoButton);
             mainMenuButtons.addButton(quitButton);
             mainMenuButtons.Parent = states[GameState.Menu];
 
@@ -506,12 +505,23 @@ namespace Block_Busters
             if (currentState == GameState.Menu)
             {
                 spriteBatch.DrawString(segoeFont, "Block Busters!", new Vector2(00, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Captain Jack Sparrowbeard was growing tired"
+                        + "\n of his life of piracy. Having grown weary of the seas he had his "
+                        + "\n ship broken down for salvage, and sold all but one of his cannons. "
+                        + "\n He is now a de-construction worker for hire that builders contract "
+                        + "\n out to go from town to town to destroy nasty condemned buildings. "
+                        + "\n The faster Captain Jack destroys the buildings the more money"
+                        + "\n they give him. If he uses too many cannonballs though the "
+                        + "\n building destruction venture may end up costing him more than "
+                        + "\n he gets paid.", new Vector2(0, 150), Color.Black);
+
             }
 
             if (currentState == GameState.Play)
             {
                 spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
                 spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Cannon Power", new Vector2(0, 400), Color.Black);
             }
             states[currentState].Draw(gameTime, spriteBatch);
             spriteBatch.End();
