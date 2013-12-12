@@ -579,7 +579,7 @@ namespace Block_Busters
                 spriteBatch.DrawString(segoeFont, " Head Designer:     Jesse McIntosh"
                         + "\n\n Head Programmer:   Jordan Nguyen"
                         + "\n\n Special Thanks:"
-                        + "\n                    Ravi Kammath"
+                        + "\n                    Ravi Kamath"
                         + "\n                    Ken Perlin", new Vector2(200, 80), Color.Black);
             }
 
