@@ -552,8 +552,12 @@ namespace Block_Busters
             if (currentState == GameState.Play)
             {
                 spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
+<<<<<<< HEAD
                 Color timeColor = (gameClock.TimeLeft <= 10) ? Color.Red : Color.Black;
                 spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), timeColor);
+=======
+                spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), Color.Black);
+>>>>>>> 2e70e9da41427f2aed3244e1692c4c8966b73e62
                 spriteBatch.DrawString(segoeFont, "Cannon Power", new Vector2(0, 410), Color.Black);
             }
             states[currentState].Draw(gameTime, spriteBatch);
