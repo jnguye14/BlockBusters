@@ -24,15 +24,11 @@ namespace Block_Busters
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        enum GameState
-        {
-            Menu,
-            Play,
-            Pause,
-            End
-        }
+        enum GameState { Menu, Info, Play, Pause, End }
         Dictionary<GameState, Transform> states;
         GameState currentState;
+
+        int score;
 
         SpriteFont segoeFont;
 
@@ -44,6 +40,7 @@ namespace Block_Busters
         List<Block> cubes = new List<Block>();
         Camera[] cameras;
         int curCamera; // index of current cammera
+        float cameraAngle = 0.0f;
         
         Skybox skybox;
         Model skyCube;
@@ -57,16 +54,21 @@ namespace Block_Busters
 
         SoundEffect click;
         SoundEffect cannonShot;
-        SoundEffect breaking;
+        SoundEffect glassHit;
+        SoundEffect woodHit;
+        SoundEffect rockHit;
 
         Button playButton;
         Button menuButton;
+        Button infoButton;
         Button quitButton;
 
         ButtonGroup mainMenuButtons;
         ButtonGroup pauseMenuButtons;
+        ButtonGroup infoMenuButtons;
 
         GUIElement pausePanel;
+        GUIElement infoPanel;
 
         public Game1()
             : base()
@@ -86,6 +88,7 @@ namespace Block_Busters
             // set up scene states
             states = new Dictionary<GameState, Transform>();
             states[GameState.Menu] = new Transform();
+            states[GameState.Info] = new Transform();
             states[GameState.Play] = new Transform();
             states[GameState.Pause] = new Transform();
             states[GameState.End] = new Transform();
@@ -110,11 +113,14 @@ namespace Block_Busters
 
             click = Content.Load<SoundEffect>("Sounds/click_tiny");
             cannonShot = Content.Load<SoundEffect>("Sounds/cannon");
+            woodHit = Content.Load<SoundEffect>("Sounds/wood2");
+            rockHit = Content.Load<SoundEffect>("Sounds/crunchy");
+            glassHit = Content.Load<SoundEffect>("Sounds/breaking");
 
             #endregion
 
             #region Camera Initialization
-            cameras = new Camera[2];
+            cameras = new Camera[3];
             cameras[0] = new Camera();
             cameras[0].Position = new Vector3(0, 0, 10); 
             cameras[0].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
@@ -122,8 +128,13 @@ namespace Block_Busters
             cameras[1].RotateX = -MathHelper.PiOver2; // to look down
             cameras[1].Position = new Vector3(0,10,0);
             cameras[1].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
+            cameras[2] = new Camera();
+            cameras[2].Position = new Vector3(0, 0, 5);
+            cameras[2].AspectRatio = GraphicsDevice.Viewport.AspectRatio;
+            
             curCamera = 0; // 0 = behind the cannon
             // 1 = top-down view
+            // 2 = first person
 
             #endregion
 
@@ -137,7 +148,7 @@ namespace Block_Busters
             ground.Texture = generator.makeGroundTexture();
 
             // load cannon
-            cannon = new Cannon(Content.Load<Model>("Models/Torus"), Content.Load<Texture2D>("Textures/Stripes"), generator.makeBlank(), new Vector3(0, 0, 5));
+            cannon = new Cannon(Content.Load<Model>("Models/Torus"), Content.Load<Texture2D>("Textures/Stripes"), generator.makeBlank(), new Vector3(0,0,5));
             cannon.Parent = states[GameState.Play];
             cannon.FireEvent += FireCannon;
             ball = Content.Load<Model>("Models/Sphere");
@@ -148,7 +159,7 @@ namespace Block_Busters
 
             //SkyBox stuff
             skyCube = Content.Load<Model>("Models/Cube");
-            skyboxTexture = Content.Load<TextureCube>("Skyboxes/uffizi");
+            skyboxTexture = Content.Load<TextureCube>("Skyboxes/SunnySkybox");
             skyboxEffect = Content.Load<Effect>("Skyboxes/Skybox");
             //Effect temp = Content.Load<Effect>("Skyboxes/Skybox");
             
@@ -161,13 +172,23 @@ namespace Block_Busters
             pausePanel.Position = new Vector3(0,20,-1);
             pausePanel.Parent = states[GameState.Pause];
 
+            infoPanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 150);
+            infoPanel.Position = new Vector3(0, 20, -1);
+            infoPanel.Parent = states[GameState.Info];
+            
             playButton = new Button(40, 50, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             playButton.MouseDown += PlayGame;
             playButton.TextColor = Color.Black;
             playButton.HoverColor = Color.YellowGreen;
             playButton.Text = "Play";
 
-            quitButton = new Button(40, 100, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            infoButton = new Button(40, 100, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
+            infoButton.MouseDown += InfoMenu;
+            infoButton.TextColor = Color.Black;
+            infoButton.HoverColor = Color.YellowGreen;
+            infoButton.Text = "Info";
+
+            quitButton = new Button(40, 150, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             quitButton.MouseDown += QuitGame;
             quitButton.TextColor = Color.Black;
             quitButton.HoverColor = Color.YellowGreen;
@@ -181,6 +202,7 @@ namespace Block_Busters
 
             mainMenuButtons = new ButtonGroup(Color.YellowGreen, click);
             mainMenuButtons.addButton(playButton);
+            mainMenuButtons.addButton(infoButton);
             mainMenuButtons.addButton(quitButton);
             mainMenuButtons.Parent = states[GameState.Menu];
 
@@ -188,8 +210,14 @@ namespace Block_Busters
             pauseMenuButtons.addButton(playButton);
             pauseMenuButtons.addButton(menuButton);
             pauseMenuButtons.Parent = states[GameState.Pause];
-            #endregion GUI Intialization
 
+            infoMenuButtons = new ButtonGroup(Color.YellowGreen, click);
+            infoMenuButtons.addButton(playButton);
+            infoMenuButtons.addButton(menuButton);
+            infoMenuButtons.Parent = states[GameState.Info];
+            
+            #endregion GUI Intialization
+            
             
             // TODO: use this.Content to load your game content here
         }
@@ -265,13 +293,13 @@ namespace Block_Busters
             states[currentState].Update(gameTime, Matrix.Identity);
 
             #region Sound listeners and emitters
-            listener.Position = cameras[0].Position;
-            listener.Up = cameras[0].Up;
-            listener.Forward = cameras[0].Forward;
+            listener.Position = cameras[curCamera].Position;
+            listener.Up = cameras[curCamera].Up;
+            listener.Forward = cameras[curCamera].Forward;
 
-            clickEmitter.Position = cameras[0].Position;                             //Sound business
-            clickEmitter.Up = cameras[0].Up;
-            clickEmitter.Forward = cameras[0].Forward;
+            clickEmitter.Position = cameras[curCamera].Position;                             //Sound business
+            clickEmitter.Up = cameras[curCamera].Up;
+            clickEmitter.Forward = cameras[curCamera].Forward;
             #endregion
 
             // to go directly to game state
@@ -313,11 +341,43 @@ namespace Block_Busters
             // Tab to switch cameras
             if (InputManager.IsKeyPressed(Keys.Tab) && currentState.Equals(GameState.Play))
             {
-                curCamera = (curCamera+1) % 2;
+                if (curCamera + 1 > 2)
+                    curCamera = 0;
+                else
+                    curCamera += 1;
             }
 
             if (currentState.Equals(GameState.Play))
             {
+                #region First Person Camera Stuff
+                float elapsedTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
+                #region WASD Movement controls
+                if (InputManager.IsKeyDown(Keys.Up))
+                {
+                    if (cameraAngle < MathHelper.PiOver2) // Vertical
+                    {
+                        cameraAngle += elapsedTime * 2f;
+                        cameras[2].RotatePitch = elapsedTime * 2f;
+                    }
+                }
+                if (InputManager.IsKeyDown(Keys.Down))
+                {
+                    if (cameraAngle > 0.0f) // Horizontal
+                    {
+                        cameraAngle -= elapsedTime * 2f;
+                        cameras[2].RotatePitch = -elapsedTime * 2f;
+                    }
+                }
+                if (InputManager.IsKeyDown(Keys.Left))
+                {
+                    cameras[2].RotateY = elapsedTime * 2f;
+                }
+                if (InputManager.IsKeyDown(Keys.Right))
+                {
+                    cameras[2].RotateY = -elapsedTime * 2f;
+                }
+                #endregion
+#endregion
                 // used a reverse for loop so the game doesn't crash when the cannonball explodes (ironic)
                 for (int i = cannonballs.Count - 1; i > -1; i--)
                 {
@@ -335,6 +395,10 @@ namespace Block_Busters
                             {
                                 b.Explode();
                             }
+                            breakEmitter.Position = c.Position;
+                            breakEmitter.Up = c.Up;
+                            breakEmitter.Forward = c.Forward;
+                            b.Explode();
                         }
                     }
                 }
@@ -403,17 +467,33 @@ namespace Block_Busters
             spriteBatch.Begin();
             if (currentState == GameState.Pause)
             {
-                spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(0, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(200, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Score:" + score, new Vector2(200, 20), Color.Black);
+            }
+
+            if (currentState == GameState.Info)
+            {
+                spriteBatch.DrawString(segoeFont, "How to play", new Vector2(200, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Use the arrow keys to look around" , new Vector2(200, 20), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Press the tab key to switch cameras", new Vector2(200, 40), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Hold the space bar to charge the cannon", new Vector2(200, 60), Color.Black);
+                spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(200, 80), Color.Black);
             }
 
             if (currentState == GameState.End)
             {
                 spriteBatch.DrawString(segoeFont, "GAME OVER", new Vector2(200, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Your Final Score:" + score , new Vector2(0, 0), Color.Black);
             }
 
             if (currentState == GameState.Menu)
             {
-                spriteBatch.DrawString(segoeFont, "Block Buster!", new Vector2(00, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Block Busters!", new Vector2(00, 0), Color.Black);
+            }
+
+            if (currentState == GameState.Play)
+            {
+                spriteBatch.DrawString(segoeFont, "Your Score:" + score, new Vector2(200, 20), Color.Black);
             }
             states[currentState].Draw(gameTime, spriteBatch);
             spriteBatch.End();
@@ -437,6 +517,10 @@ namespace Block_Busters
             currentState = GameState.Menu;
         }
 
+        private void InfoMenu(object sender, EventArgs args)
+        {
+            currentState = GameState.Info;
+        }
         private void FireCannon(object sender, EventArgs args)
         {
             // SFX: play fire cannon sound
@@ -466,15 +550,30 @@ namespace Block_Busters
             {
                 case Block.Type.Glass:
                     // SFX: play breaking glass sound
+                    SoundEffectInstance glassHitInstance = glassHit.CreateInstance();
+                    glassHitInstance.Apply3D(listener, breakEmitter);
+                    glassHitInstance.Play();
+                    glassHitInstance.Apply3D(listener, breakEmitter);
                     // increase score
+                    score += 10;
                     break;
                 case Block.Type.Wood:
                     // SFX: play breaking wood sound
+                    SoundEffectInstance woodHitInstance = woodHit.CreateInstance();
+                    woodHitInstance.Apply3D(listener, breakEmitter);
+                    woodHitInstance.Play();
+                    woodHitInstance.Apply3D(listener, breakEmitter);
                     // increase score
+                    score += 10;
                     break;
                 case Block.Type.Stone:
                     // SFX: play breaking stone sound
+                    SoundEffectInstance rockHitInstance = rockHit.CreateInstance();
+                    rockHitInstance.Apply3D(listener, breakEmitter);
+                    rockHitInstance.Play();
+                    rockHitInstance.Apply3D(listener, breakEmitter);
                     // increase score
+                    score += 10;
                     break;
                 default:
                     break;
