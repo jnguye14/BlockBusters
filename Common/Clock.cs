@@ -21,12 +21,12 @@ namespace Common
         private TimeSpan elapsedTime = TimeSpan.Zero;
 
         public Clock(Texture2D texture)
-            : base(texture, 10, 10)
+            : base(texture)
         {
             TimeLeft = 60; // a minute
         }
 
-        public Clock(Texture2D texture, int time) : base(texture, 100, 100)
+        public Clock(Texture2D texture, int time) : base(texture)
         {
             TimeLeft = time;
         }
