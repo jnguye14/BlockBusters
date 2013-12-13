@@ -122,8 +122,8 @@ namespace Block_Busters
             spriteBatch = new SpriteBatch(GraphicsDevice);
             segoeFont = Content.Load<SpriteFont>("Fonts/Segoe");
 
-            gameClock = new Clock(Content.Load<Texture2D>("Textures/KingWhite"));
-            gameClock.Position = new Vector3(5, 5, -1);
+            gameClock = new Clock(Content.Load<Texture2D>("Textures/KingWhite"), Content.Load<Texture2D>("Textures/Triangle"));
+            gameClock.Position = new Vector3(30, 30, -1);
             gameClock.Parent = states[GameState.Play];
             gameClock.TimeUpEvent += GameOver;
 

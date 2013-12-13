@@ -37,6 +37,12 @@ namespace Common.GUI
             set;
         }
 
+        public Vector2 GUIOrigin
+        {
+            get;
+            set;
+        }
+
         #region Constructors
         // default constructor
         public GUIElement() : base()
@@ -45,6 +51,7 @@ namespace Common.GUI
             Width = 0;
             Height = 0;
             eleColor = Color.White;
+            GUIOrigin = Vector2.Zero;
         }
 
         // Constructor with texture
@@ -54,6 +61,7 @@ namespace Common.GUI
             Width = texture.Width;
             Height = texture.Height;
             eleColor = Color.White;
+            GUIOrigin = Vector2.Zero;
         }
 
         // Constructor with texture and dimensions
@@ -63,6 +71,7 @@ namespace Common.GUI
             Width = w;
             Height = h;
             eleColor = Color.White;
+            GUIOrigin = Vector2.Zero;
         }
         #endregion
 
@@ -72,7 +81,16 @@ namespace Common.GUI
             {
                 Vector3 position = (World * parentTransform).Translation;
                 //spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Color.White);
-                spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), eleColor);
+                //spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), eleColor);
+                //*
+                spriteBatch.Draw(Texture,
+                        new Rectangle((int)position.X, (int)position.Y, Width, Height), // destination rectangle
+                        null, // source rectangle
+                        eleColor, // color
+                        (float)(Rotation.Z * 180.0f / MathHelper.Pi), // rotation
+                        GUIOrigin, //origin,
+                        SpriteEffects.None, // sprite effects
+                        0);
             }
             base.Draw(gameTime, spriteBatch, parentTransform);
         }
