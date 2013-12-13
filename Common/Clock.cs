@@ -42,7 +42,8 @@ namespace Common
             GUIOrigin = new Vector2(handTexture.Width / 2, handTexture.Height);// / 2);
         }
 
-        public Clock(Texture2D faceTexture, Texture2D handTexture, int time) : base(handTexture)
+        public Clock(Texture2D faceTexture, Texture2D handTexture, int time)
+            : base(handTexture)
         {
             ClockFace = faceTexture;
             TimeLeft = time;
