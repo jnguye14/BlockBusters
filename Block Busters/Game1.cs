@@ -510,11 +510,21 @@ namespace Block_Busters
                     currentState = GameState.End; // game over
                 }
 
+                if (cubes.Count <= 0)
+                {
+                    foreach (Cannonball ball in cannonballs)
+                    {
+                        ball.Parent = null;
+                    }
+                    cannonballs.Clear();
+                }
+
                 // used a reverse for loop so the game doesn't crash when the cannonball explodes (ironic)
                 for (int i = cannonballs.Count - 1; i > -1; i--)
                 {
                     Cannonball b = cannonballs[i];
                     b.Update(gameTime);
+                        
                     // used another reverse for loop so the game doesn't crash when the block breaks (double irony)
                     for (int j = cubes.Count - 1; j > -1; j--) 
                     {
@@ -665,15 +675,16 @@ namespace Block_Busters
             }
             cubes.Clear();
 
-            /*// get rid of cannon balls
-            foreach (Cannonball ball in cannonballs)
+            // get rid of cannon balls
+           /* foreach (Cannonball ball in cannonballs)
             {
                 ball.Parent = null;
             }
-            cannonballs.Clear();//*/
+            cannonballs.Clear();*/
 
             level++;
             score += gameClock.TimeLeft * 10;
+            
             gameClock.TimeLeft = 20;
             switch (level)
             {
