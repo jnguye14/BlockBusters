@@ -68,9 +68,12 @@ namespace Common.GUI
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch, Matrix parentTransform)
         {
-            Vector3 position = (World * parentTransform).Translation;
-            //spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Color.White);
-            spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), eleColor);
+            if (Texture != null)
+            {
+                Vector3 position = (World * parentTransform).Translation;
+                //spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Color.White);
+                spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), eleColor);
+            }
             base.Draw(gameTime, spriteBatch, parentTransform);
         }
     }

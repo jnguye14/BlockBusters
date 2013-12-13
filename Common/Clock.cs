@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Common.GUI;
 
 namespace Common
 {
-    public class Clock
+    public class Clock : GUIElement
     {
         public event EventHandler<EventArgs> TimeUpEvent;
 
@@ -18,17 +20,18 @@ namespace Common
 
         private TimeSpan elapsedTime = TimeSpan.Zero;
 
-        public Clock()
+        public Clock(Texture2D texture)
+            : base(texture, 10, 10)
         {
             TimeLeft = 60; // a minute
         }
 
-        public Clock(int time)
+        public Clock(Texture2D texture, int time) : base(texture, 100, 100)
         {
             TimeLeft = time;
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime, Matrix parentTransform)
         {
             if (TimeLeft != 0)
             {
@@ -43,6 +46,12 @@ namespace Common
                     }
                 }
             }
+            base.Update(gameTime, parentTransform);
+        }
+
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch, Matrix parentTransform)
+        {
+            base.Draw(gameTime, spriteBatch, parentTransform);
         }
 
         protected virtual void OnTimeUpEvent()

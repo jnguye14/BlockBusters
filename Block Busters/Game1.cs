@@ -1,5 +1,6 @@
 ﻿#region Using Statements
 using System;
+using System.Media; // for sound player
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -30,7 +31,7 @@ namespace Block_Busters
 
         int level = -1;
         int score = 100;
-        Clock gameClock = new Clock();
+        Clock gameClock;
 
         SpriteFont segoeFont;
 
@@ -51,6 +52,10 @@ namespace Block_Busters
         Effect skyboxEffect;
 
         TextureGenerator generator;
+        
+        // to play background music:
+        SoundPlayer player = new SoundPlayer();
+        bool mute = false;
 
         AudioListener listener = new AudioListener();
         AudioEmitter cannonEmitter = new AudioEmitter();
@@ -114,16 +119,23 @@ namespace Block_Busters
             spriteBatch = new SpriteBatch(GraphicsDevice);
             segoeFont = Content.Load<SpriteFont>("Fonts/Segoe");
 
+            gameClock = new Clock(Content.Load<Texture2D>("Textures/KingWhite"));
+            gameClock.Position = new Vector3(5, 5, -1);
+            gameClock.Parent = states[GameState.Play];
             gameClock.TimeUpEvent += GameOver;
 
             #region Sound Intialization
 
+            // play background music (using the system SoundPlayer which only plays waves...)
+            player.SoundLocation = Content.RootDirectory + "\\Sounds\\Acid_Swamps.wav";
+            player.PlayLooping();
+            
             click = Content.Load<SoundEffect>("Sounds/click_tiny");
             cannonShot = Content.Load<SoundEffect>("Sounds/cannon");
             woodHit = Content.Load<SoundEffect>("Sounds/wood2");
             rockHit = Content.Load<SoundEffect>("Sounds/crunchy");
             glassHit = Content.Load<SoundEffect>("Sounds/breaking");
-
+            
             #endregion
 
             #region Camera Initialization
@@ -373,6 +385,7 @@ namespace Block_Busters
             states[currentState].Update(gameTime, Matrix.Identity);
 
             #region Sound listeners and emitters
+            
             listener.Position = cameras[curCamera].Position;
             listener.Up = cameras[curCamera].Up;
             listener.Forward = cameras[curCamera].Forward;
@@ -404,7 +417,19 @@ namespace Block_Busters
                 currentState = GameState.End;
             }
 
-      
+            // M to Mute
+            if (InputManager.IsKeyReleased(Keys.M))
+            {
+                mute = !mute;
+                if (mute)
+                {
+                    player.Stop();
+                }
+                else
+                {
+                    player.PlayLooping();
+                }
+            }
 
             // P to Pause
             if (currentState.Equals(GameState.Play) || currentState.Equals(GameState.Pause))
@@ -433,7 +458,7 @@ namespace Block_Busters
 
             if (currentState.Equals(GameState.Play))
             {
-                gameClock.Update(gameTime);
+                //gameClock.Update(gameTime);
 
                 #region First Person Camera Stuff
                 float elapsedTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
@@ -613,6 +638,20 @@ namespace Block_Busters
 
         void nextLvl()
         {
+            // clear out the blocks
+            foreach (Block cube in cubes)
+            {
+                cube.Parent = null;
+            }
+            cubes.Clear();
+
+            /*// get rid of cannon balls
+            foreach (Cannonball ball in cannonballs)
+            {
+                ball.Parent = null;
+            }
+            cannonballs.Clear();//*/
+
             level++;
             switch (level)
             {
