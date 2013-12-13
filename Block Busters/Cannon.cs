@@ -57,7 +57,7 @@ namespace Block_Busters
             float elapsedTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
 
             #region WASD Movement controls
-            if (InputManager.IsKeyDown(Keys.Up))
+            if (InputManager.IsKeyDown(Keys.Up) || InputManager.IsKeyDown(Keys.W))
             {
                 if(Angle < MathHelper.PiOver2) // Vertical
                 {
@@ -65,7 +65,7 @@ namespace Block_Busters
                     RotatePitch = elapsedTime * MovementSpeed;
                 }
             }
-            if (InputManager.IsKeyDown(Keys.Down))
+            if (InputManager.IsKeyDown(Keys.Down) || InputManager.IsKeyDown(Keys.S))
             {
                 if(Angle > 0.0f) // Horizontal
                 {
@@ -73,11 +73,11 @@ namespace Block_Busters
                     RotatePitch = -elapsedTime * MovementSpeed;
                 }
             }
-            if (InputManager.IsKeyDown(Keys.Left))
+            if (InputManager.IsKeyDown(Keys.Left) || InputManager.IsKeyDown(Keys.A))
             {
                 RotateY = elapsedTime * MovementSpeed;
             }
-            if (InputManager.IsKeyDown(Keys.Right))
+            if (InputManager.IsKeyDown(Keys.Right) || InputManager.IsKeyDown(Keys.D))
             {
                 RotateY = -elapsedTime * MovementSpeed;
             }

@@ -122,7 +122,7 @@ namespace Block_Busters
             spriteBatch = new SpriteBatch(GraphicsDevice);
             segoeFont = Content.Load<SpriteFont>("Fonts/Segoe");
 
-            gameClock = new Clock(Content.Load<Texture2D>("Textures/KingWhite"), Content.Load<Texture2D>("Textures/Triangle"));
+            gameClock = new Clock(Content.Load<Texture2D>("Textures/sprite0_0"), Content.Load<Texture2D>("Textures/Triangle"));
             gameClock.Position = new Vector3(30, 30, -1);
             gameClock.Parent = states[GameState.Play];
             gameClock.TimeUpEvent += GameOver;
@@ -479,7 +479,7 @@ namespace Block_Busters
 
                 #region First Person Camera Stuff
                 float elapsedTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
-                if (InputManager.IsKeyDown(Keys.Up))
+                if (InputManager.IsKeyDown(Keys.Up) || InputManager.IsKeyDown(Keys.W))
                 {
                     if (cameraAngle < MathHelper.PiOver2) // Vertical
                     {
@@ -487,7 +487,7 @@ namespace Block_Busters
                         cameras[2].RotatePitch = elapsedTime * 2f;
                     }
                 }
-                if (InputManager.IsKeyDown(Keys.Down))
+                if (InputManager.IsKeyDown(Keys.Down) || InputManager.IsKeyDown(Keys.S))
                 {
                     if (cameraAngle > 0.0f) // Horizontal
                     {
@@ -495,11 +495,11 @@ namespace Block_Busters
                         cameras[2].RotatePitch = -elapsedTime * 2f;
                     }
                 }
-                if (InputManager.IsKeyDown(Keys.Left))
+                if (InputManager.IsKeyDown(Keys.Left) || InputManager.IsKeyDown(Keys.A))
                 {
                     cameras[2].RotateY = elapsedTime * 2f;
                 }
-                if (InputManager.IsKeyDown(Keys.Right))
+                if (InputManager.IsKeyDown(Keys.Right) || InputManager.IsKeyDown(Keys.D))
                 {
                     cameras[2].RotateY = -elapsedTime * 2f;
                 }

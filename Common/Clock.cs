@@ -54,15 +54,15 @@ namespace Common
         {
             float timeElapsed = (float)(gameTime.ElapsedGameTime.TotalSeconds);
             
-            if (TimeLeft != 0)
+            if (timeLeft != 0)
             {
                 elapsedTime += gameTime.ElapsedGameTime;
                 if (elapsedTime > TimeSpan.FromSeconds(1)) // every second
                 {
                     elapsedTime -= TimeSpan.FromSeconds(1);
                     RotateZ = 4.0f / 360.0f;
-                    TimeLeft--;
-                    if (TimeLeft <= 0)
+                    timeLeft--;
+                    if (timeLeft <= 0)
                     {
                         OnTimeUpEvent();
                     }
