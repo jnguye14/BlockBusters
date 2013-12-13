@@ -75,6 +75,9 @@ namespace Block_Busters
 
         GUIElement pausePanel;
         GUIElement infoPanel;
+        GUIElement howToPanel;
+        GUIElement mainMenuPanel;
+        GUIElement playPanel;
 
         public Game1()
             : base()
@@ -180,8 +183,22 @@ namespace Block_Busters
             pausePanel.Parent = states[GameState.Pause];
 
             infoPanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 200);
-            infoPanel.Position = new Vector3(0, 20, -1);
+            infoPanel.Position = new Vector3(0, 0, -2);
             infoPanel.Parent = states[GameState.Info];
+
+            mainMenuPanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 200, 120);
+            mainMenuPanel.Position = new Vector3(0, 0, -2);
+            mainMenuPanel.Parent = states[GameState.Menu];
+
+            howToPanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 500, 200);
+            howToPanel.Position = new Vector3(200, 60, -1);
+            howToPanel.eleColor = Color.Yellow;
+            howToPanel.Parent = states[GameState.Info];
+
+            playPanel = new GUIElement(Content.Load<Texture2D>("Textures/Square"), 270, 70);
+            playPanel.Position = new Vector3(180, 0, -1);
+            playPanel.eleColor = Color.SeaShell;
+            playPanel.Parent = states[GameState.Play];
             
             playButton = new Button(40, 50, 50, 25, Content.Load<Texture2D>("Textures/Square"), segoeFont);
             playButton.MouseDown += PlayGame;
@@ -554,9 +571,10 @@ namespace Block_Busters
 
             // start 2D Drawing
             spriteBatch.Begin();
+            states[currentState].Draw(gameTime, spriteBatch);
             if (currentState == GameState.Pause)
             {
-                spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(200, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(10, 20), Color.Black);
                 spriteBatch.DrawString(segoeFont, "Money Left: $" + score + ".00", new Vector2(200, 20), Color.Black);
                 Color timeColor = (gameClock.TimeLeft <= 10) ? Color.Red : Color.Black;
                 spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), timeColor);
@@ -564,12 +582,14 @@ namespace Block_Busters
 
             if (currentState == GameState.Info)
             {
-                spriteBatch.DrawString(segoeFont, "How to play", new Vector2(200, 60), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Use the arrow keys to look around" , new Vector2(200, 80), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Press the tab key to switch cameras", new Vector2(200, 100), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Hold the space bar to charge the cannon", new Vector2(200, 120), Color.Black);
-                spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(200, 140), Color.Black);
-                spriteBatch.DrawString(segoeFont, "Destroy the buildings before time runs out", new Vector2(200, 160), Color.Black);
+                spriteBatch.DrawString(segoeFont, "How to play", new Vector2(220, 60), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Use the arrow keys to look around" , new Vector2(220, 80), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Press the tab key to switch cameras", new Vector2(220, 100), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Hold the space bar to charge the cannon", new Vector2(220, 120), Color.Black);
+                spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(220, 140), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Destroy the buildings before time runs out", new Vector2(220, 160), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Press M to Mute the music", new Vector2(220, 180), Color.Black);
+
             }
 
             if (currentState == GameState.End)
@@ -585,7 +605,7 @@ namespace Block_Busters
 
             if (currentState == GameState.Menu)
             {
-                spriteBatch.DrawString(segoeFont, "Block Busters!", new Vector2(00, 0), Color.Black);
+                spriteBatch.DrawString(segoeFont, "Block Busters!", new Vector2(15, 5), Color.Black);
                 spriteBatch.DrawString(segoeFont, "Captain Jack Sparrowbeard was growing tired"
                         + "\n of his life of piracy. Having grown weary of the seas he had his "
                         + "\n ship broken down for salvage, and sold all but one of his cannons. "
@@ -605,7 +625,7 @@ namespace Block_Busters
                 spriteBatch.DrawString(segoeFont, "Time Left: " + gameClock.TimeLeft + " Seconds", new Vector2(200, 40), timeColor);
                 spriteBatch.DrawString(segoeFont, "Cannon Power", new Vector2(0, 410), Color.Black);
             }
-            states[currentState].Draw(gameTime, spriteBatch);
+            
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -614,6 +634,8 @@ namespace Block_Busters
         void nextLvl()
         {
             level++;
+            score += gameClock.TimeLeft * 10;
+            gameClock.TimeLeft = 20;
             switch (level)
             {
                 case 0 :
@@ -643,7 +665,7 @@ namespace Block_Busters
         {
             // reset variables
             level = -1;
-            gameClock.TimeLeft = 60;
+            gameClock.TimeLeft = 20;
             score = 100;
             nextLvl();
             currentState = GameState.Play;
