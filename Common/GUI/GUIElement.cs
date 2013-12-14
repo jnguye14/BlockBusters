@@ -80,9 +80,6 @@ namespace Common.GUI
             if (Texture != null)
             {
                 Vector3 position = (World * parentTransform).Translation;
-                //spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Color.White);
-                //spriteBatch.Draw(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), eleColor);
-                //*
                 spriteBatch.Draw(Texture,
                         new Rectangle((int)position.X, (int)position.Y, Width, Height), // destination rectangle
                         null, // source rectangle
@@ -90,7 +87,7 @@ namespace Common.GUI
                         (float)(Rotation.Z * 180.0f / MathHelper.Pi), // rotation
                         GUIOrigin, //origin,
                         SpriteEffects.None, // sprite effects
-                        0);
+                        0); // depth
             }
             base.Draw(gameTime, spriteBatch, parentTransform);
         }

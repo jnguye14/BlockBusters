@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Common.GUI;
 
-namespace Common
+namespace Common.GUI
 {
     public class Clock : GUIElement
     {
@@ -34,6 +33,7 @@ namespace Common
 
         private TimeSpan elapsedTime = TimeSpan.Zero;
 
+        #region Constructors
         public Clock(Texture2D faceTexture, Texture2D handTexture)
             : base(handTexture)
         {
@@ -49,6 +49,7 @@ namespace Common
             TimeLeft = time;
             GUIOrigin = new Vector2(handTexture.Width / 2, handTexture.Height);// / 2);
         }
+        #endregion
 
         public override void Update(GameTime gameTime, Matrix parentTransform)
         {

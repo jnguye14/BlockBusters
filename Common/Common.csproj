@@ -35,7 +35,7 @@
     <Compile Include="AI\AStarNode.cs" />
     <Compile Include="AI\AStarSearch.cs" />
     <Compile Include="AnimationSprite.cs" />
-    <Compile Include="Clock.cs" />
+    <Compile Include="GUI\Clock.cs" />
     <Compile Include="CustomObject.cs" />
     <Compile Include="GUI\Button.cs" />
     <Compile Include="GUI\ButtonGroup.cs" />

@@ -22,9 +22,12 @@ namespace Block_Busters
     /// </summary>
     public class Game1 : Game
     {
+        #region Global Variables
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        SpriteFont segoeFont;
 
+        // Game state variables
         enum GameState { Menu, Info, Play, Pause, End }
         Dictionary<GameState, Transform> states;
         GameState currentState;
@@ -33,19 +36,20 @@ namespace Block_Busters
         int score = 100;
         Clock gameClock;
 
-        SpriteFont segoeFont;
-
+        // objects in playing field
         ModelObject ground;
         Cannon cannon;
         Model ball;
         List<Cannonball> cannonballs = new List<Cannonball>();
-
-        List<Block> cubes = new List<Block>();
         Model cube;
+        List<Block> cubes = new List<Block>();
+        
+        // camera variables
         Camera[] cameras;
         int curCamera; // index of current cammera
         float cameraAngle = 0.0f;
         
+        // skybox variables
         Skybox skybox;
         Model skyCube;
         TextureCube skyboxTexture;
@@ -57,6 +61,7 @@ namespace Block_Busters
         SoundPlayer player = new SoundPlayer();
         bool mute = false;
 
+        // SFX variables
         AudioListener listener = new AudioListener();
         AudioEmitter cannonEmitter = new AudioEmitter();
         AudioEmitter breakEmitter = new AudioEmitter();
@@ -68,6 +73,7 @@ namespace Block_Busters
         SoundEffect woodHit;
         SoundEffect rockHit;
 
+        // GUI variables
         Button playButton;
         Button menuButton;
         Button infoButton;
@@ -83,6 +89,7 @@ namespace Block_Busters
         GUIElement howToPanel;
         GUIElement mainMenuPanel;
         GUIElement playPanel;
+        #endregion
 
         public Game1()
             : base()
@@ -157,7 +164,6 @@ namespace Block_Busters
             curCamera = 0; // 0 = behind the cannon
             // 1 = top-down view
             // 2 = first person
-
             #endregion
 
             #region Game Objects Initialization
@@ -183,8 +189,6 @@ namespace Block_Busters
             skyCube = Content.Load<Model>("Models/Cube");
             skyboxTexture = Content.Load<TextureCube>("Skyboxes/SunnySkybox");
             skyboxEffect = Content.Load<Effect>("Skyboxes/Skybox");
-            //Effect temp = Content.Load<Effect>("Skyboxes/Skybox");
-            
             skybox = new Skybox(skyCube,skyboxTexture,skyboxEffect);
             #endregion
 
@@ -257,9 +261,6 @@ namespace Block_Busters
             gameOverMenuButtons.addButton(quitButton);
             gameOverMenuButtons.Parent = states[GameState.End];
             #endregion GUI Intialization
-            
-            
-            // TODO: use this.Content to load your game content here
         }
 
         #region Building Construction
@@ -373,8 +374,6 @@ namespace Block_Busters
                 block.BreakEvent += Broken;
                 cubes.Add(block);
             }
-
-
         }
         #endregion
 
@@ -402,16 +401,15 @@ namespace Block_Busters
             states[currentState].Update(gameTime, Matrix.Identity);
 
             #region Sound listeners and emitters
-            
             listener.Position = cameras[curCamera].Position;
             listener.Up = cameras[curCamera].Up;
             listener.Forward = cameras[curCamera].Forward;
 
-            clickEmitter.Position = cameras[curCamera].Position;                             //Sound business
+            clickEmitter.Position = cameras[curCamera].Position; //Sound business
             clickEmitter.Up = cameras[curCamera].Up;
             clickEmitter.Forward = cameras[curCamera].Forward;
 
-            cannonEmitter.Position = cameras[2].Position;                             //Sound business
+            cannonEmitter.Position = cameras[2].Position; //Sound business
             cannonEmitter.Up = cameras[2].Up;
             cannonEmitter.Forward = cameras[2].Forward;
             #endregion
@@ -467,16 +465,14 @@ namespace Block_Busters
             // Tab to switch cameras
             if (InputManager.IsKeyPressed(Keys.Tab) && currentState.Equals(GameState.Play))
             {
-                if (curCamera + 1 > 2)
+                if (++curCamera > 2)
+                {
                     curCamera = 0;
-                else
-                    curCamera += 1;
+                }
             }
 
             if (currentState.Equals(GameState.Play))
             {
-                //gameClock.Update(gameTime);
-
                 #region First Person Camera Stuff
                 float elapsedTime = (float)(gameTime.ElapsedGameTime.TotalSeconds);
                 if (InputManager.IsKeyDown(Keys.Up) || InputManager.IsKeyDown(Keys.W))
@@ -576,9 +572,9 @@ namespace Block_Busters
                 default: // something weird happened
                     break;
             }
+
             if (currentState == GameState.Pause)
             {
-
                 states[GameState.Play].Draw(gameTime, cameras[curCamera]);
                 states[currentState].Draw(gameTime, cameras[curCamera]);
                 foreach (Cannonball b in cannonballs)
@@ -586,7 +582,6 @@ namespace Block_Busters
                     b.Draw(gameTime, cameras[curCamera]);
                 }
             }
-            
 
             if (currentState.Equals(GameState.Play))
             {
@@ -596,7 +591,6 @@ namespace Block_Busters
                     b.Draw(gameTime, cameras[curCamera]);
                 }
             }
-
             else
                 states[currentState].Draw(gameTime, cameras[curCamera]);
 
@@ -607,6 +601,7 @@ namespace Block_Busters
             // start 2D Drawing
             spriteBatch.Begin();
             states[currentState].Draw(gameTime, spriteBatch);
+
             if (currentState == GameState.Pause)
             {
                 spriteBatch.DrawString(segoeFont, "GAME PAUSED", new Vector2(10, 20), Color.Black);
@@ -624,7 +619,6 @@ namespace Block_Busters
                 spriteBatch.DrawString(segoeFont, "realse to fire", new Vector2(220, 140), Color.Black);
                 spriteBatch.DrawString(segoeFont, "Destroy the buildings before time runs out", new Vector2(220, 160), Color.Black);
                 spriteBatch.DrawString(segoeFont, "Press M to Mute the music", new Vector2(220, 180), Color.Black);
-
             }
 
             if (currentState == GameState.End)
@@ -650,7 +644,6 @@ namespace Block_Busters
                         + "\n they give him. If he uses too many cannonballs though the "
                         + "\n building destruction venture may end up costing him more than "
                         + "\n he gets paid.", new Vector2(0, 150), Color.Black);
-
             }
 
             if (currentState == GameState.Play)
@@ -743,6 +736,7 @@ namespace Block_Busters
             cannonShotInstance.Apply3D(listener, breakEmitter);
             cannonShotInstance.Play();
             cannonShotInstance.Apply3D(listener, breakEmitter);
+
             // create cannonball
             Cannonball cb = new Cannonball(ball, cannon.Position, cannon.Forward, cannon.PowerBar.CurrentFillAmount);
             cb.Texture = generator.makeMarbleTexture();
