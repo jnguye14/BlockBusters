@@ -62,7 +62,7 @@ namespace Common.GUI
             }
 
             // menu up
-            if (isKeyTyped(Keys.Up))
+            if (isKeyTyped(Keys.Up) || isKeyTyped(Keys.W))
             {
                 selectSFX.Play();
                 selectedButton--;
@@ -72,7 +72,7 @@ namespace Common.GUI
                 }
             }
             // menu down
-            if (isKeyTyped(Keys.Down))
+            if (isKeyTyped(Keys.Down) || isKeyTyped(Keys.S))
             {
                 selectSFX.Play();
                 selectedButton++;
@@ -81,7 +81,7 @@ namespace Common.GUI
                     selectedButton = 0;
                 }
             }
-            if (isKeyTyped(Keys.Enter))
+            if (isKeyTyped(Keys.Enter) || isKeyTyped(Keys.Space))
             {
                 // select button, perform action
                 buttons[selectedButton].pressMe();
