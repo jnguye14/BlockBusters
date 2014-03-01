@@ -50,6 +50,11 @@ namespace Block_Busters
         Model skyCube;
         TextureCube skyboxTexture;
         Effect skyboxEffect;
+        Effect phongShading;
+        Effect reflectShading;
+        Effect toonShading;
+        Effect woodShading;
+        Effect metalShading;
 
         TextureGenerator generator;
         
